@@ -4,10 +4,10 @@
 	<title>Jonny</title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<link href="css/app.css" rel="stylesheet" type="text/css">
+	<link href="css/index.css" rel="stylesheet" type="text/css">
 	<link href="css/preloader.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-	<script type="text/javascript" src='test1.js'></script>
+	<script type="text/javascript" src='hsk/hsk1.js'></script>
 	<script type="text/javascript">
 	// https://emojipedia.org/symbols/
 	// Make flipcard app working, Q:A sys
@@ -20,7 +20,7 @@
 	      document.getElementById("loader").style.display = "none";
 	    },500)
 	  }
-		let hsk1 = [
+		let dictCards = [
 		];
 		let cardDiv, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
 		let divAnswers, frontCard, backCard, progress;
@@ -60,17 +60,17 @@
 			getCategory(checkBox,elvl);
 			// console.log(dict);
 			echange.onclick = () => {
-				cardSets = getCards(hsk1,9);
+				cardSets = getCards(dictCards,9);
 				addCards(cardSets,cardDiv);
 			}
 			for (let i = 0; i < dict.length; i++) {
 				let entry = dict[i].split(' ');
 				let eng = entry.splice(4,entry.length).join(' ')
-				hsk1.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
+				dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
 			}
-			cardSets = getCards(hsk1,9);
+			cardSets = getCards(dictCards,9);
 			addCards(cardSets,cardDiv);
-			// console.log(hsk1)
+			// console.log(dictCards)
 		}
 		function randint(min, max) {
 		  return Math.floor(Math.random() * (max - min + 1) ) + min;
@@ -84,13 +84,13 @@
 		function studyCard(set,front,back) {
 			let x = set[studyCardN];
 			front.innerHTML = `
-				<p>${hsk1[x].pinyin}</p>
-				<p>${hsk1[x].simplified}</p>
+				<p>${dictCards[x].pinyin}</p>
+				<p>${dictCards[x].simplified}</p>
 			`;
 			pinyin();
 			back.innerHTML = `
-				<p>${hsk1[x].pinyin}</p>
-				<p>${hsk1[x].eng}</p>
+				<p>${dictCards[x].pinyin}</p>
+				<p>${dictCards[x].eng}</p>
 			`;
 			let rndThree = getCards(set,2);
 			rndThree.push(x);
@@ -101,7 +101,7 @@
 			divAnswers.innerHTML = '';
 			for (n of rndThree) {
 				let answerBtn = document.createElement('button');
-				answerBtn.innerHTML = hsk1[n].eng;
+				answerBtn.innerHTML = dictCards[n].eng;
 				answerBtn.onclick = function() {
 					if (studyCardN < 9) {
 						this.disabled = true;
@@ -152,9 +152,9 @@
 				let card = document.createElement('div');
 				card.className = 'cards';
 				card.innerHTML = `
-					<p>${hsk1[x].pinyin}</p>
-					<p>${hsk1[x].simplified}</p>
-					<p>${hsk1[x].eng}</p>
+					<p>${dictCards[x].pinyin}</p>
+					<p>${dictCards[x].simplified}</p>
+					<p>${dictCards[x].eng}</p>
 				`;
 				output.appendChild(card);
 			}

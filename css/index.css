@@ -6,9 +6,9 @@
 }
 @font-face {
   font-family: 'notoEmoji';
-  src: url('../notoemoji.ttf') format('truetype'),
-   url('../notoemoji.woff') format('woff'),
-   url('../notoemoji.woff2') format('woff2');
+  src: url('../fonts/notoemoji.ttf') format('truetype'),
+   url('../fonts/notoemoji.woff') format('woff'),
+   url('../fonts/notoemoji.woff2') format('woff2');
 }
 html {
   font-family: Arial,'Hiragino Sans GB',STXihei,'Microsoft YaHei',sans-serif;
