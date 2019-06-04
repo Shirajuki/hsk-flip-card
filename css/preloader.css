@@ -43,7 +43,8 @@
   width: 40px;
   height: 40px;
   margin: 100px auto;
-  background-color: #ad1385aa;
+  background-color: #ad138577;
+  opacity: 1;
 
   border-radius: 100%;
   -webkit-animation: sk-scaleout 2.0s infinite ease-in-out;
@@ -53,6 +54,7 @@
   0% {
     -webkit-transform: scale(0);
     transform: scale(0);
+    opacity: 1;
   } 100% {
     -webkit-transform: scale(40.0);
     transform: scale(40.0);

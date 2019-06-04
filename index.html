@@ -3,7 +3,7 @@
 <head>
 	<title>Jonny</title>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 	<link href="css/index.css" rel="stylesheet" type="text/css">
 	<link href="css/preloader.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
@@ -11,7 +11,7 @@
 	<script type="text/javascript">
 	// https://emojipedia.org/symbols/
 	// Make flipcard app working, Q:A sys
-		setTimeout(showPage, 100);
+		setTimeout(showPage, 1400);
 
 	  function showPage() {
 			document.getElementById("loader").style.visibility = "hidden";
@@ -96,19 +96,26 @@
 			rndThree.push(x);
 			rndThree = shuffle(rndThree)
 			console.log(rndThree);
-			bigCard.classList.toggle('animate-2');
-			divAnswers.classList.toggle('animate-3');
+			toggleAnimate(bigCard,'animate-2');
+			toggleAnimate(divAnswers,'animate-3');
 			divAnswers.innerHTML = '';
 			for (n of rndThree) {
 				let answerBtn = document.createElement('button');
 				answerBtn.innerHTML = dictCards[n].eng;
+				// answerBtn.style.boxShadow = `
+				// 	0 0 0.3rem 5px #fff,
+				// 	0 0 0.5rem 10px rgba(255,200,200,1),
+				// 	0 0 1rem 15px rgba(255,200,150,0.9),
+				// 	inset 0 0 1rem rgba(255,150,150,0.8)`;
 				answerBtn.onclick = function() {
 					if (studyCardN < 9) {
 						this.disabled = true;
 						if (this.innerHTML == backCard.children[1].innerHTML) {
-							bigCard.classList.toggle('animate-2');
-							divAnswers.classList.toggle('animate-3');
-							this.style.boxShadow = 'inset 0 0 2rem rgba(255,150,150,0.8)';
+							this.style.boxShadow = `
+								0 0 0.3rem 5px #fff,
+								0 0 0.5rem 10px rgba(255,200,200,1),
+								0 0 1rem 15px rgba(255,200,150,0.9),
+								inset 0 0 1rem rgba(255,150,150,0.8)`;
 							this.style.backgroundColor = 'white';
 							setTimeout(() => {
 								studies();
@@ -124,6 +131,12 @@
 				}
 				divAnswers.appendChild(answerBtn);
 			}
+		}
+		function toggleAnimate(dom,animateName) {
+			dom.classList.toggle(animateName);
+			setTimeout(() =>{
+				dom.classList.toggle(animateName);
+			},1400);
 		}
 		function studies() {
 			studyCard(cardSets,frontCard,backCard);
@@ -160,14 +173,15 @@
 			}
 		}
 		function openClose(bool,dom,animateType=1) {
-			if (animateType !== 0) {
-				for (let i = 0; i < dom.childElementCount; i++) {
-					dom.children[i].classList.toggle(`animate-${animateType}`);
-				}
-			}
 		  if (bool) {
 		    dom.style.visibility = 'visible';
 		    dom.style.opacity = '1';
+
+				if (animateType !== 0) {
+					for (let i = 0; i < dom.childElementCount; i++) {
+						toggleAnimate(dom.children[i],`animate-${animateType}`);
+					}
+				}
 		  } else {
 		    dom.style.visibility = 'hidden';
 		    dom.style.opacity = '0';
@@ -224,7 +238,7 @@
 		<header>
 			<div>
 				<p><a id='eback'><i>⬅</i></a> Practice</p>
-				<p>[ yuh ]</p>
+				<p>[ pinyin I/O 'TBA' ]</p>
 			</div>
 		</header>
 		<div id="eflip">
