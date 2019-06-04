@@ -136,10 +136,10 @@ button {
   color: var(--theme-color1)
 }
 button.btn {
-  box-shadow: 0 7px #e762ff;
+  box-shadow: 0 7px rgba(255,220,220,0.9);
 }
 button.btn:active {
-  box-shadow: 0 5px #e762ff;
+  box-shadow: 0 5px rgba(255,220,220,0.9);
   transform: translateY(3px);
 }
 .popup {
@@ -209,6 +209,7 @@ progress[value]::-webkit-progress-value {
   background-color: white;
   border-radius: 2px;
   background-size: 35px 20px, 100% 100%, 100% 100%;
+  transition: width 1.5s ease;
 }
 #divAnswers {
   display: grid;
@@ -310,7 +311,7 @@ input[type=checkbox] {
   display: none;
 }
 input[type=checkbox] + label:before {
-  content: "✔";
+  content: " ";
   border: 0.1rem solid #000;
   border-radius: 0.4rem;
   display: inline-block;
@@ -325,7 +326,7 @@ input[type=checkbox] + label:active:before {
   transform: scale(0);
 }
 input[type=checkbox]:checked + label:before {
-  background-color: #e762ff;
+  background-color: rgba(0,0,0,0.7);
   border-color: 0.1rem solid var(--theme-color1);
   color: #fff;
 }
