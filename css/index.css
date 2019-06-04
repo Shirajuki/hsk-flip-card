@@ -4,6 +4,17 @@
   --text-color1: black;
   --text-color2: #888;
 }
+* {
+  /* disable text selection */
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
 @font-face {
   font-family: 'notoEmoji';
   src: url('../fonts/notoemoji.ttf') format('truetype'),
@@ -17,14 +28,6 @@ html {
   color: white;
   font-size: 12pt;
   zoom: 1.1;
-  /* disable text selection */
-  -webkit-touch-callout:none;
-  -webkit-user-select:none;
-  -khtml-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
-  -webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 header {
   line-height: 13pt;
