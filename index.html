@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+<head>
+	<title>Jonny</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<link href="css/app.css" rel="stylesheet" type="text/css">
+	<link href="css/preloader.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	<script type="text/javascript" src='test1.js'></script>
+	<script type="text/javascript">
+	// https://emojipedia.org/symbols/
+	// Make flipcard app working, Q:A sys
+		setTimeout(showPage, 100);
+
+	  function showPage() {
+			document.getElementById("loader").style.visibility = "hidden";
+			document.getElementById("loader").style.opacity = 0;
+	    setTimeout(() => {
+	      document.getElementById("loader").style.display = "none";
+	    },500)
+	  }
+		let hsk1 = [
+		];
+		let cardDiv, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
+		let divAnswers, frontCard, backCard, progress;
+		let studyCardN = 0;
+		let checkPinyin = false;
+		let cardSets = new Set();
+		window.onload = () => {
+			cardDiv = document.getElementById('cardDiv');
+			echange = document.getElementById('echange');
+			study = document.getElementById('study');
+			estudy = document.getElementById('estudy');
+			choose = document.getElementById('choose');
+			progress = document.getElementById('progress');
+
+			divAnswers = document.getElementById('divAnswers');
+			frontCard = document.getElementById('front');
+			backCard = document.getElementById('back');
+
+			elvl = document.getElementById('elvl');
+			elvl.onclick = () => openClose(true,choose);
+			echoose = document.getElementById('echoose');
+			echoose.onclick = () => openClose(false,choose);
+			checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
+			for (let i = 0; i < checkBox.length; i++) {
+				checkBox[i].onchange = () => getCategory(checkBox,elvl);
+			}
+			bigCard = document.getElementById('bigCard');
+			eflip = document.getElementById('eflip');
+			eback = document.getElementById('eback');
+			eflip.onclick = () => bigCard.classList.toggle('flipped');
+			estudy.onclick = () => {
+				openClose(true,study);
+				studyCardN = 0;
+				studies();
+			};
+			eback.onclick = () => openClose(false,study);
+			getCategory(checkBox,elvl);
+			// console.log(dict);
+			echange.onclick = () => {
+				cardSets = getCards(hsk1,9);
+				addCards(cardSets,cardDiv);
+			}
+			for (let i = 0; i < dict.length; i++) {
+				let entry = dict[i].split(' ');
+				let eng = entry.splice(4,entry.length).join(' ')
+				hsk1.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
+			}
+			cardSets = getCards(hsk1,9);
+			addCards(cardSets,cardDiv);
+			// console.log(hsk1)
+		}
+		function randint(min, max) {
+		  return Math.floor(Math.random() * (max - min + 1) ) + min;
+		}
+		function shuffle(array) {
+		  return array.sort(() => Math.random() - 0.5);
+		}
+		function pinyin() {
+			if (checkPinyin) front.children[0].style.opacity = 0;
+		}
+		function studyCard(set,front,back) {
+			let x = set[studyCardN];
+			front.innerHTML = `
+				<p>${hsk1[x].pinyin}</p>
+				<p>${hsk1[x].simplified}</p>
+			`;
+			pinyin();
+			back.innerHTML = `
+				<p>${hsk1[x].pinyin}</p>
+				<p>${hsk1[x].eng}</p>
+			`;
+			let rndThree = getCards(set,2);
+			rndThree.push(x);
+			rndThree = shuffle(rndThree)
+			console.log(rndThree);
+			bigCard.classList.toggle('animate-2');
+			divAnswers.classList.toggle('animate-3');
+			divAnswers.innerHTML = '';
+			for (n of rndThree) {
+				let answerBtn = document.createElement('button');
+				answerBtn.innerHTML = hsk1[n].eng;
+				answerBtn.onclick = function() {
+					if (studyCardN < 9) {
+						this.disabled = true;
+						if (this.innerHTML == backCard.children[1].innerHTML) {
+							bigCard.classList.toggle('animate-2');
+							divAnswers.classList.toggle('animate-3');
+							this.style.boxShadow = 'inset 0 0 2rem rgba(255,150,150,0.8)';
+							this.style.backgroundColor = 'white';
+							setTimeout(() => {
+								studies();
+								if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
+								progress.value++;
+							},600)
+						}
+					} else {
+						studyCardN = 0;
+						progress.value = 0;
+						openClose(false,study);
+					}
+				}
+				divAnswers.appendChild(answerBtn);
+			}
+		}
+		function studies() {
+			studyCard(cardSets,frontCard,backCard);
+			studyCardN++;
+		}
+		function getCategory(arrDom,output) {
+			elvl.innerHTML = 'HSK';
+			for (let i = 0; i < arrDom.length; i++) {
+				if (arrDom[i].checked) {
+					elvl.innerHTML += `-${arrDom[i].value}`;
+				}
+			}
+		}
+		function getCards(list,n) {
+			let set = new Set();
+			while (set.size < n) {
+				set.add(randint(0,list.length-1));
+			}
+			set = Array.from(set);
+			console.log(set);
+			return set;
+		}
+		function addCards(arr,output) {
+			output.innerHTML = '';
+			for (x of arr) {
+				let card = document.createElement('div');
+				card.className = 'cards';
+				card.innerHTML = `
+					<p>${hsk1[x].pinyin}</p>
+					<p>${hsk1[x].simplified}</p>
+					<p>${hsk1[x].eng}</p>
+				`;
+				output.appendChild(card);
+			}
+		}
+		function openClose(bool,dom,animateType=1) {
+			if (animateType !== 0) {
+				for (let i = 0; i < dom.childElementCount; i++) {
+					dom.children[i].classList.toggle(`animate-${animateType}`);
+				}
+			}
+		  if (bool) {
+		    dom.style.visibility = 'visible';
+		    dom.style.opacity = '1';
+		  } else {
+		    dom.style.visibility = 'hidden';
+		    dom.style.opacity = '0';
+		  }
+		}
+	</script>
+</head>
+<body>
+	<div id="loader">
+		<!-- <div id="preloader" preload></div> -->
+		<div class="spinner" preload></div>
+	</div>
+	<!-- Header -->
+	<header>
+		<button id="elvl">HSK</button>
+		<br><br>
+	</header>
+	<br>
+	<!-- Main -->
+	<main>
+		<div id="cardDiv">
+		</div>
+	</main>
+	<br>
+	<div class='divButtons'>
+		<div>
+			<a><p id='echange'><i>◀</i> Change cards <i>▶</i></p></a>
+			<button id='estudy' class='btn'>Study</button>
+		</div>
+	</div>
+	<!-- Footer -->
+	<footer>
+		<button id='home' class='active'><i>🏠</i></button>
+		<button id='test'><i>📚</i></button>
+		<button id='list'><i>📜</i></button>
+	</footer>
+
+	<!-- HSK Level -->
+	<div class="popup" id='choose'>
+		<div>
+			<h4>Choose Flipcards from categories</h4>
+			<p><input type="checkbox" name="hsk-1" id="hsk1" value="1" checked><label for="hsk1">HSK1</label></p>
+			<p><input type="checkbox" name="hsk-2" id="hsk2" value="2"><label for="hsk2">HSK2</label></p>
+			<p><input type="checkbox" name="hsk-3" id="hsk3" value="3"><label for="hsk3">HSK3</label></p>
+			<p><input type="checkbox" name="hsk-4" id="hsk4" value="4"><label for="hsk4">HSK4</label></p>
+			<p><input type="checkbox" name="hsk-5" id="hsk5" value="5"><label for="hsk5">HSK5</label></p>
+			<p><input type="checkbox" name="hsk-6" id="hsk6" value="6"><label for="hsk6">HSK6</label></p>
+		</div>
+		<br>
+		<button id="echoose" class='btn'>Confirm</button>
+	</div>
+	<!-- Study Flipcards -->
+	<div class="popup" id='study'>
+		<header>
+			<div>
+				<p><a id='eback'><i>⬅</i></a> Practice</p>
+				<p>[ yuh ]</p>
+			</div>
+		</header>
+		<div id="eflip">
+			<div id="bigCard">
+				<div id="front">
+					<p>gǒu</p>
+					<p>狗</p>
+				</div>
+				<div id="back">
+					<p>gǒu</p>
+					<p>indicates a completed or finished action action action</p>
+				</div>
+			</div>
+		</div>
+		<span style='margin-top: 20px;'>click to flip</span>
+		<br><br>
+		<div style='justify-content: center; display: flex; width: 93%;'>
+			<div id="divAnswers">
+				<button>Who</button>
+				<button>indicates a completed or finished action action action</button>
+				<button>Where</button>
+			</div>
+		</div>
+		<progress id='progress' value="0" max="9"></progress>
+	</div>
+</body>
+</html>
