@@ -110,13 +110,18 @@
 					if (studyCardN < 9) {
 						this.disabled = true;
 						if (this.innerHTML == backCard.children[1].innerHTML) {
+							for (dom of divAnswers.children) {
+								dom.disabled = true;
+							}
 							this.style.boxShadow = '0 0 10px 10px rgb(255,230,230)';
 							this.style.backgroundColor = 'white';
 							setTimeout(() => {
 								studies();
 								if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
 								progress.value++;
-							},700)
+							},700);
+						} else {
+							this.style.backgroundColor = '#00000077';
 						}
 					} else {
 						studyCardN = 0;

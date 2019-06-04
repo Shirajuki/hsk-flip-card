@@ -234,7 +234,7 @@ progress[value]::-webkit-progress-value {
   transition: box-shadow .3s, border .3s;
 }
 #divAnswers button:disabled {
-  background-color: #00000077;
+  /* background-color: #00000077; */
   cursor: auto;
 }
 #divAnswers button::after {
@@ -254,9 +254,9 @@ progress[value]::-webkit-progress-value {
   10% { transform: scale(10, 10); opacity: 1; }
   100% { transform: scale(100, 100); opacity: 0; }
 }
-#divAnswers button:active::after, #divAnswers button:focus::after, #divAnswers button:disabled::after {
+/* #divAnswers button:active::after, #divAnswers button:focus::after {
   animation: ripple .6s ease-out;
-}
+} */
 #eflip {
   background-color: transparent;
   width: 80%;
