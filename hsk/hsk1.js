@@ -1,4 +1,4 @@
-﻿let dict = [
+﻿let hsk1 = [
 "﻿爱 愛 ai4 ài love",
 "八 八 ba1 bā eight",
 "爸爸 爸爸 ba4ba5 bàba Dad",

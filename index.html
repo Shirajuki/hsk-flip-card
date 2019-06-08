@@ -8,10 +8,12 @@
 	<link href="css/preloader.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 	<script type="text/javascript" src='hsk/hsk1.js'></script>
+	<script type="text/javascript" src='hsk/hsk2.js'></script>
+	<script type="text/javascript" src='hsk/hsk3.js'></script>
 	<script type="text/javascript">
 	// https://emojipedia.org/symbols/
 	// Make flipcard app working, Q:A sys
-		setTimeout(showPage, 1400);
+		setTimeout(showPage, 14);
 	  function showPage() {
 			document.getElementById("loader").style.visibility = "hidden";
 			document.getElementById("loader").style.opacity = 0;
@@ -21,72 +23,117 @@
 	  }
 		let dictCards = [
 		];
-		let cardDiv, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
-		let divAnswers, frontCard, backCard, progress;
-		let studyCardN = 0;
-		let checkPinyin = false;
+		let cardDiv, allCards, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
+		let divAnswers, frontCard, backCard, progress, pinyinToggle, gameover;
+		let studyCardN = 0, correctStudy = 0;
+		let canFlip = false;
 		let cardSets = new Set();
+		// Onload DOM and Event setups. Also calls some functions to initialize the app.
 		window.onload = () => {
+		// DOM - main menu
 			cardDiv = document.getElementById('cardDiv');
 			echange = document.getElementById('echange');
 			study = document.getElementById('study');
 			estudy = document.getElementById('estudy');
 			choose = document.getElementById('choose');
-			progress = document.getElementById('progress');
 
+			echange.onclick = () => {
+				cardSets = getCards(dictCards,9);
+				addCards(cardSets,cardDiv);
+				correctStudy = 0;
+				getMainCardData();
+			}
+			estudy.onclick = () => {
+				openClose(true,study);
+				studyCardN = 0;
+				cardSets = shuffle(cardSets);
+				studies();
+			};
+		// DOM - study section
 			divAnswers = document.getElementById('divAnswers');
 			frontCard = document.getElementById('front');
 			backCard = document.getElementById('back');
+			progress = document.getElementById('progress');
+			pinyinToggle = document.getElementById('pinyinToggle');
+			gameover = document.getElementById('gameover');
 
+			bigCard = document.getElementById('bigCard');
+			eflip = document.getElementById('eflip');
+			eback = document.getElementById('eback');
+			pinyinToggle.onchange = function() {
+				pinyin(this.checked);
+			}
+			eflip.onclick = () => {
+				if (canFlip) bigCard.classList.toggle('flipped');
+			};
+			eback.onclick = () => {
+				openClose(false,study);
+				correctStudy = 0;
+				progress.value = 0;
+			}
+		// DOM - hsk level chooser
 			elvl = document.getElementById('elvl');
 			elvl.onclick = () => openClose(true,choose);
 			echoose = document.getElementById('echoose');
-			echoose.onclick = () => openClose(false,choose);
+			echoose.onclick = () => {
+				openClose(false,choose);
+
+				cardSets = getCards(dictCards,9);
+				addCards(cardSets,cardDiv);
+				correctStudy = 0;
+				getMainCardData();
+			};
 			checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
 			for (let i = 0; i < checkBox.length; i++) {
 				checkBox[i].onchange = () => getCategory(checkBox,elvl);
 			}
-			bigCard = document.getElementById('bigCard');
-			eflip = document.getElementById('eflip');
-			eback = document.getElementById('eback');
-			eflip.onclick = () => bigCard.classList.toggle('flipped');
-			estudy.onclick = () => {
-				openClose(true,study);
-				studyCardN = 0;
-				studies();
-			};
-			eback.onclick = () => openClose(false,study);
+		// Initalize card functions, load the cards in for the first time.
 			getCategory(checkBox,elvl);
-			// console.log(dict);
-			echange.onclick = () => {
-				cardSets = getCards(dictCards,9);
-				addCards(cardSets,cardDiv);
-			}
-			for (let i = 0; i < dict.length; i++) {
-				let entry = dict[i].split(' ');
-				let eng = entry.splice(4,entry.length).join(' ')
-				dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
-			}
 			cardSets = getCards(dictCards,9);
 			addCards(cardSets,cardDiv);
+			getMainCardData();
+			// openClose(true,study);
+			// console.log(dict);
 			// console.log(dictCards)
 		}
+		// Main menu function to give onclick event. CSS animation to flip card.
+		function getMainCardData() {
+			allCards = document.getElementsByClassName('cards');
+			for (let i = 0; i < allCards.length; i++) {
+				allCards[i].onclick = function() {mainFlip(this)};
+			}
+		}
+		function mainFlip(dom) {
+			toggleAnimate(dom,'cardsFlip',100);
+			dom.onclick = function() {};
+			setTimeout(function() {
+				dom.onclick = () => mainFlip(dom);
+			},1000);
+		}
+		// Custom logic functions for returning certain logical things.
 		function randint(min, max) {
 		  return Math.floor(Math.random() * (max - min + 1) ) + min;
 		}
 		function shuffle(array) {
 		  return array.sort(() => Math.random() - 0.5);
 		}
-		function pinyin() {
-			if (checkPinyin) front.children[0].style.opacity = 0;
+		// Function to enable/disable pinyin from the flipcards
+		function pinyin(checked) {
+			if (!checked) {
+				front.children[0].style.opacity = 0;
+			} else {
+				front.children[0].style.opacity = 1;
+			}
 		}
+		// Function that operates the study section of the app,
+		// shows and setups other functions for the game to work.
 		function studyCard(set,front,back) {
 			let x = set[studyCardN];
 			front.innerHTML = `
 				<p>${dictCards[x].pinyin}</p>
 				<p>${dictCards[x].simplified}</p>
 			`;
-			pinyin();
+			pinyin(pinyinToggle.checked);
 			back.innerHTML = `
 				<p>${dictCards[x].pinyin}</p>
 				<p>${dictCards[x].eng}</p>
@@ -95,61 +142,97 @@
 			rndThree.push(x);
 			rndThree = shuffle(rndThree)
 			console.log(rndThree);
+			canFlip = false;
 			toggleAnimate(bigCard,'animate-2');
 			toggleAnimate(divAnswers,'animate-3');
+			setTimeout(() => canFlip = true, 700);
 			divAnswers.innerHTML = '';
 			for (n of rndThree) {
 				let answerBtn = document.createElement('button');
 				answerBtn.innerHTML = dictCards[n].eng;
-				// answerBtn.style.boxShadow = `
-				// 	0 0 0.3rem 5px #fff,
-				// 	0 0 0.5rem 10px rgba(255,200,200,1),
-				// 	0 0 1rem 15px rgba(255,200,150,0.9),
-				// 	inset 0 0 1rem rgba(255,150,150,0.8)`;
+				answerBtn.value = 'undefined';
+				setTimeout(() => answerBtn.value = 'canClick',900);
 				answerBtn.onclick = function() {
-					if (studyCardN < 9) {
-						this.disabled = true;
-						if (this.innerHTML == backCard.children[1].innerHTML) {
-							for (dom of divAnswers.children) {
-								dom.disabled = true;
+					if (this.value != 'undefined') {
+						if (studyCardN < 9) {
+							this.disabled = true;
+							if (this.innerHTML == backCard.children[1].innerHTML) {
+								for (dom of divAnswers.children) {
+									dom.disabled = true;
+								}
+								correctStudy++;
+								this.style.boxShadow = '0 0 10px 10px rgb(255,230,230)';
+								this.style.backgroundColor = 'white';
+								setTimeout(() => {
+									studies();
+									if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
+									progress.value++;
+								},700);
+							} else {
+								this.style.backgroundColor = '#00000077';
+								correctStudy--;
 							}
-							this.style.boxShadow = '0 0 10px 10px rgb(255,230,230)';
-							this.style.backgroundColor = 'white';
-							setTimeout(() => {
-								studies();
-								if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
-								progress.value++;
-							},700);
 						} else {
-							this.style.backgroundColor = '#00000077';
+							studyCardN = 0;
+							progress.value = 0;
+							openClose(true,gameover);
+							gameover.children[0].innerHTML = (correctStudy !== 8) ? ('FAIL') : ('PASS');
+							setTimeout(() => {
+								openClose(false,gameover);
+								openClose(false,study);
+								if (correctStudy !== 8) {
+									openClose(true,study);
+									studyCardN = 0;
+									studies();
+								}
+								correctStudy = 0;
+							},2000)
 						}
-					} else {
-						studyCardN = 0;
-						progress.value = 0;
-						openClose(false,study);
 					}
-				}
+					}
 				divAnswers.appendChild(answerBtn);
 			}
-		}
-		function toggleAnimate(dom,animateName) {
-			dom.classList.toggle(animateName);
-			setTimeout(() =>{
-				dom.classList.toggle(animateName);
-			},1400);
 		}
 		function studies() {
 			studyCard(cardSets,frontCard,backCard);
 			studyCardN++;
 		}
+		// Custom function for toggling CSS animations after a given time.
+		function toggleAnimate(dom,animateName,time=1400) {
+			dom.classList.toggle(animateName);
+			setTimeout(() =>{
+				dom.classList.toggle(animateName);
+			},time);
+		}
+		// Function to choose which HSK level, displat as text too.
 		function getCategory(arrDom,output) {
 			elvl.innerHTML = 'HSK';
+			dictCards = [];
 			for (let i = 0; i < arrDom.length; i++) {
 				if (arrDom[i].checked) {
-					elvl.innerHTML += `-${arrDom[i].value}`;
+					let value = arrDom[i].value;
+					elvl.innerHTML += `-${value}`;
+					// Push all hsk to dict.
+					let dict = eval(`hsk${value}`);
+					for (let i = 0; i < dict.length; i++) {
+						let entry = dict[i].split(' ');
+						let eng = entry.splice(4,entry.length).join(' ')
+						dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
+					}
+				}
+			}
+			if (dictCards.length == 0) {
+				arrDom[0].checked = true;
+				let value = arrDom[0].value;
+				elvl.innerHTML += `-${value}`;
+				for (let i = 0; i < hsk1.length; i++) {
+					let entry = hsk1[i].split(' ');
+					let eng = entry.splice(4,entry.length).join(' ')
+					dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng});
 				}
 			}
 		}
+		// Get unique cards from dictCards
 		function getCards(list,n) {
 			let set = new Set();
 			while (set.size < n) {
@@ -159,6 +242,7 @@
 			console.log(set);
 			return set;
 		}
+		// Add the words from differenct HSK levels to the dictCards
 		function addCards(arr,output) {
 			output.innerHTML = '';
 			for (x of arr) {
@@ -172,6 +256,7 @@
 				output.appendChild(card);
 			}
 		}
+		// Custom function to open/close popups.
 		function openClose(bool,dom,animateType=1) {
 		  if (bool) {
 		    dom.style.visibility = 'visible';
@@ -234,11 +319,19 @@
 		<button id="echoose" class='btn'>Confirm</button>
 	</div>
 	<!-- Study Flipcards -->
+	<div class="popup" id='gameover'>
+		<h1>FAIL</h1>
+	</div>
 	<div class="popup" id='study'>
 		<header>
 			<div>
-				<p><a id='eback'><i>⬅</i></a> Practice</p>
-				<p>[ pinyin I/O 'TBA' ]</p>
+				<p><a id='eback'><i>⬅</i> RETURN</a></p>
+				<p>
+					<label class="switch">
+					  <input type="checkbox" id='pinyinToggle'>
+					  <span class="slider round"></span>
+					</label>
+				</p>
 			</div>
 		</header>
 		<div id="eflip">
@@ -249,7 +342,7 @@
 				</div>
 				<div id="back">
 					<p>gǒu</p>
-					<p>indicates a completed or finished action action action</p>
+					<p>dog</p>
 				</div>
 			</div>
 		</div>
@@ -257,9 +350,9 @@
 		<br><br>
 		<div style='justify-content: center; display: flex; width: 93%;'>
 			<div id="divAnswers">
-				<button>Who</button>
-				<button>indicates a completed or finished action action action</button>
-				<button>Where</button>
+				<button>A1</button>
+				<button>A2</button>
+				<button>A3</button>
 			</div>
 		</div>
 		<progress id='progress' value="0" max="9"></progress>

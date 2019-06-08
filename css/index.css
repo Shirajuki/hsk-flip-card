@@ -1,6 +1,6 @@
 :root {
   --theme-color1: #f7a7b9;
-  --theme-color2: #9c5162;
+  --theme-color2: rgba(255,220,220,0.9);
   --text-color1: black;
   --text-color2: #888;
 }
@@ -112,6 +112,10 @@ footer .active:after {
 
   transform-style: preserve-3d;
   animation: rotate3D 0.5s linear;
+  transition: transform .5s;
+}
+.cardsFlip {
+  animation: none;
 }
 .cards p:nth-child(even) {
   /* font-weight: bold; */
@@ -169,6 +173,9 @@ button.btn:active {
   flex-flow: row wrap;
   width: 80%;
   padding: 10px;
+}
+#choose div h4 {
+  width: 100%;
 }
 #choose div, .popup button {
   color: black;
@@ -298,6 +305,8 @@ progress[value]::-webkit-progress-value {
 #front p, #back p {
   height: 40px;
   margin: 20px;
+  transition: opacity 1s;
+
 }
 #front p:first-child, #back p:first-child {
   color: var(--text-color2);
@@ -333,6 +342,62 @@ input[type=checkbox]:checked + label:before {
   background-color: rgba(0,0,0,0.7);
   border-color: 0.1rem solid var(--theme-color1);
   color: #fff;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  top: -7px;
+  width: 49px;
+  height: 29px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--theme-color2);
+  border: 2px solid white;
+  border-radius: 20px;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  top: 3.5px;
+  left: 5px;
+  border-radius: 50%;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+input:checked + .slider {
+  background-color: transparent;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px transparent;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(100%);
+  transform: translateX(100%);
+}
+#eback {
+  font-size: 1.15rem;
+}
+#gameover {
+  z-index: 9999;
+}
+#gameover h1 {
+  font-size: 7rem;
 }
 @media only screen and (max-height: 670px) {
   html { zoom: 0.9 }
