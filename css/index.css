@@ -399,14 +399,20 @@ input:checked + .slider:before {
 #gameover h1 {
   font-size: 7rem;
 }
-@media only screen and (max-height: 670px) {
+@media only screen and (max-height: 680px) {
   html { zoom: 0.9 }
 }
-@media only screen and (max-height: 570px) {
+@media only screen and (max-height: 580px) {
   html { zoom: 0.8 }
 }
-@media only screen and (max-height: 500px) {
+@media only screen and (max-height: 510px) {
   html { zoom: 0.7 }
+}
+@media only screen and (max-height: 460px) {
+  html { zoom: 0.6 }
+}
+@media only screen and (max-height: 380px) {
+  html { zoom: 0.5 }
 }
 @keyframes rotate3D {
   from { transform: rotateY(-180deg); opacity: 0; }

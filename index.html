@@ -10,6 +10,7 @@
 	<script type="text/javascript" src='hsk/hsk1.js'></script>
 	<script type="text/javascript" src='hsk/hsk2.js'></script>
 	<script type="text/javascript" src='hsk/hsk3.js'></script>
+	<script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 	<script type="text/javascript">
 	// https://emojipedia.org/symbols/
 	// Make flipcard app working, Q:A sys
@@ -130,10 +131,7 @@
 				//   audio.play();
 				// 	console.log(word);
 				// }, false);
-				let utterance = new SpeechSynthesisUtterance()
-				utterance.text = word;
-				utterance.lang = 'zh-CN'
-				window.speechSynthesis.speak(utterance)
+				responsiveVoice.speak(word,"Chinese Taiwan Female", "{pitch: 2, rate: 1, volume: 1}");
 			}
 		}
 		// Function to enable/disable pinyin from the flipcards
