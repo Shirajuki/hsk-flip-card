@@ -64,7 +64,11 @@
 				pinyin(this.checked);
 			}
 			eflip.onclick = () => {
-				if (canFlip) bigCard.classList.toggle('flipped');
+				if (canFlip) {
+					bigCard.classList.toggle('flipped');
+					let word = frontCard.children[1].innerText;
+					playTTS(word);
+				}
 			};
 			eback.onclick = () => {
 				openClose(false,study);
@@ -117,6 +121,14 @@
 		function shuffle(array) {
 		  return array.sort(() => Math.random() - 0.5);
 		}
+		// Function to play google translates tts if there's wifi
+		function playTTS(word) {
+			if (navigator.onLine) {
+				let audio = new Audio();
+				audio.src =`https://translate.google.com.vn/translate_tts?ie=UTF-8&q=${word}+&tl=zh&client=tw-ob`;
+				audio.play();
+			}
+		}
 		// Function to enable/disable pinyin from the flipcards
 		function pinyin(checked) {
 			if (!checked) {
@@ -145,6 +157,10 @@
 			canFlip = false;
 			toggleAnimate(bigCard,'animate-2');
 			toggleAnimate(divAnswers,'animate-3');
+			setTimeout(() => {
+				let word = dictCards[x].simplified;
+				playTTS(word);
+			},250)
 			setTimeout(() => canFlip = true, 700);
 			divAnswers.innerHTML = '';
 			for (n of rndThree) {
