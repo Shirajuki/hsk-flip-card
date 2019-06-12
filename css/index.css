@@ -415,6 +415,12 @@ input:checked + .slider:before {
 @media only screen and (max-height: 380px) {
   html { zoom: 0.5 }
 }
+@media only screen and (max-height: 320px) {
+  html { zoom: 0.45 }
+}
+@media only screen and (max-height: 300px) {
+  html { zoom: 0.35 }
+}
 @keyframes rotate3D {
   from { transform: rotateY(-180deg); opacity: 0; }
   to { transform: rotateY(0deg); opacity: 1; }
