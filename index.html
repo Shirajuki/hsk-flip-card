@@ -125,9 +125,11 @@
 		function playTTS(word) {
 			if (navigator.onLine) {
 				let audio = new Audio();
-				audio.src =`https://translate.google.com.vn/translate_tts?ie=UTF-8&q=${word}+&tl=zh&client=tw-ob`;
+				// audio.src =`https://translate.google.com.vn/translate_tts?ie=UTF-8&q=${word}+&tl=zh&client=tw-ob`;
+				audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=zh-CN&client=tw-ob&q=${word}`
 				audio.addEventListener('canplaythrough', () => {
 				  audio.play();
+					console.log(word);
 				}, false);
 			}
 		}
