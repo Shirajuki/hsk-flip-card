@@ -9,7 +9,7 @@
   justify-content: center;
   align-items: center;
   z-index: 8888;
-  background-color: rgba(255,150,150,1);
+  background-color: var(--theme-color1);
   transition: .3s;
 }
 #preloader {

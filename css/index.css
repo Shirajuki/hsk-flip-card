@@ -40,12 +40,29 @@ header button {
 body {
   overflow: hidden;
 }
-main {
+#page3 #listWords {
+  overflow: scroll;
+  height: 85vh
+}
+#page3 #listWords div {
+  font-size: 1.6rem;
+  color: black;
+  background-color: white;
+  border-radius: 5px;
+  display: grid;
+  grid-template-columns: 30% 30% 40%;
+  justify-content: space-around;
+  margin: 3px 0;
+}
+#page1 .cardsMain {
   display: flex;
   justify-content: center;
   align-items: center;
   /* flex-direction: column; */
   padding: 5px;
+}
+#page2, #page3 {
+  display: none;
 }
 .divButtons {
   display: flex;
@@ -96,7 +113,6 @@ footer .active:after {
   display: grid;
   grid-gap: 7px;
   grid-template-columns: minmax(0, 33%) minmax(0, 33%) minmax(0, 33%);
-  margin: -1rem -1rem;
 
   width: 100%;
   height: 100%;

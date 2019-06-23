@@ -13,8 +13,7 @@
 	<script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 	<script type="text/javascript">
 	// https://emojipedia.org/symbols/
-	// Make flipcard app working, Q:A sys
-		setTimeout(showPage, 14);
+		setTimeout(showPage, 1400);
 	  function showPage() {
 			document.getElementById("loader").style.visibility = "hidden";
 			document.getElementById("loader").style.opacity = 0;
@@ -22,17 +21,26 @@
 	      document.getElementById("loader").style.display = "none";
 	    },500)
 	  }
-		let dictCards = [
-		];
+		let dictCards = [];
 		let cardDiv, allCards, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
 		let divAnswers, frontCard, backCard, progress, pinyinToggle, gameover;
+		let home, test, list;
 		let studyCardN = 0, correctStudy = 0;
 		let canFlip = false;
 		let cardSets = new Set();
+
+		let wordsLearned = [];
 		// Onload DOM and Event setups. Also calls some functions to initialize the app.
 		window.onload = () => {
 			// console.log = function() {};
 			// alert( 'Your screen resolution is ' + screen.width + 'x' + screen.height );
+		// DOM - footer
+			home = document.getElementById('home');
+			test = document.getElementById('test');
+			list = document.getElementById('list');
+			for (let v of [home,test,list]) {
+				v.onclick = function() {menyChange(this)};
+			}
 		// DOM - main menu
 			cardDiv = document.getElementById('cardDiv');
 			echange = document.getElementById('echange');
@@ -99,9 +107,16 @@
 			cardSets = getCards(dictCards,9);
 			addCards(cardSets,cardDiv);
 			getMainCardData();
-			// openClose(true,study);
-			// console.log(dict);
-			// console.log(dictCards)
+			menyChange(list);
+		}
+		function sendLocalStorage(input) {
+			if (localStorage.hskFlipCard == undefined) {
+				localStorage.hskFlipCard = [];
+				sendLocalStorage(input);
+			} else {
+				wordsLearned = JSON.parse(localStorage.hskFlipCard);
+				localStorage.hskFlipCard = JSON.stringify([...new Set(input)]);
+			}
 		}
 		// Main menu function to give onclick event. CSS animation to flip card.
 		function getMainCardData() {
@@ -124,15 +139,27 @@
 		function shuffle(array) {
 		  return array.sort(() => Math.random() - 0.5);
 		}
+		function menyChange(meny) {
+			for (let v of [home,test,list]) {
+				v.classList.remove('active');
+			}
+			for (let i = 1; i <= 3; i++) {
+				document.getElementById(`page${i}`).style.display = 'none';
+			}
+			meny.classList.add('active');
+			document.getElementById(`page${meny.name}`).style.display = 'block';
+			console.log(meny.name);
+			if (meny.name == 3) {
+				wordsLearned = JSON.parse(localStorage.hskFlipCard);
+				document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "";
+				for (let i = 0; i < wordsLearned.length; i++) {
+					document.getElementById(`page${meny.name}`).lastElementChild.innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+				}
+			}
+		}
 		// Function to play google translates tts if there's wifi
 		function playTTS(word) {
 			if (navigator.onLine) {
-				// let audio = new Audio();
-				// audio.src =`https://translate.google.com.vn/translate_tts?ie=UTF-8&q=${word}+&tl=zh&client=tw-ob`;
-				// audio.addEventListener('canplaythrough', () => {
-				//   audio.play();
-				// 	console.log(word);
-				// }, false);
 				responsiveVoice.speak(word,"Chinese Taiwan Female", "{pitch: 2, rate: 1, volume: 1}");
 			}
 		}
@@ -208,6 +235,9 @@
 									studyCardN = 0;
 									studies();
 								}
+								wordsLearned.push(cardSets.map(x => dictCards[x]));
+								wordsLearned = [...new Set(wordsLearned)].flat();
+								sendLocalStorage(wordsLearned);
 								correctStudy = 0;
 							},2000)
 						}
@@ -303,6 +333,7 @@
 		<!-- <div id="preloader" preload></div> -->
 		<div class="spinner" preload></div>
 	</div>
+
 	<!-- Header -->
 	<header>
 		<button id="elvl">HSK</button>
@@ -311,21 +342,38 @@
 	<br>
 	<!-- Main -->
 	<main>
-		<div id="cardDiv">
+		<!-- PAGE 1 -->
+		<div id="page1">
+			<div class="cardsMain">
+				<div id="cardDiv">
+				</div>
+			</div>
+			<br>
+			<div class='divButtons'>
+				<div>
+					<a><p id='echange'><i>◀</i> Change cards <i>▶</i></p></a>
+					<button id='estudy' class='btn'>Study</button>
+				</div>
+			</div>
+		</div>
+		<!-- PAGE 2 -->
+		<div id="page2">
+			<p>test</p>
+		</div>
+
+		<!-- PAGE 3 -->
+		<div id="page3">
+			<h3>Words Learned:</h3>
+			<div id="listWords">
+				<div><span>A</span><span>B</span><span>C</span></div>
+			</div>
 		</div>
 	</main>
-	<br>
-	<div class='divButtons'>
-		<div>
-			<a><p id='echange'><i>◀</i> Change cards <i>▶</i></p></a>
-			<button id='estudy' class='btn'>Study</button>
-		</div>
-	</div>
 	<!-- Footer -->
 	<footer>
-		<button id='home' class='active'><i>🏠</i></button>
-		<button id='test'><i>📚</i></button>
-		<button id='list'><i>📜</i></button>
+		<button name="1" id='home' class='active'><i>🏠</i></button>
+		<button name="2" id='test'><i>📚</i></button>
+		<button name="3" id='list'><i>📜</i></button>
 	</footer>
 
 	<!-- HSK Level -->
