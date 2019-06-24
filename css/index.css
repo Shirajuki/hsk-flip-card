@@ -258,7 +258,7 @@ progress[value]::-webkit-progress-value {
   transition: box-shadow .3s, border .3s;
 }
 #divAnswers button:disabled {
-  background-color: rgba(0,0,0,0.7);
+  /* background-color: rgba(0,0,0,0.7); */
   cursor: auto;
 }
 #divAnswers button::after {
