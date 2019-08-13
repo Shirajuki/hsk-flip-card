@@ -12,7 +12,7 @@
 	<script type="text/javascript" src='hsk/hsk3.js'></script>
 	<script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 	<script type="text/javascript">
-		// https://emojipedia.org/symbols/
+	// https://emojipedia.org/symbols/
 		setTimeout(showPage, 1400);
 	  function showPage() {
 			document.getElementById("loader").style.visibility = "hidden";
@@ -110,10 +110,11 @@
 			// menyChange(list);
 		}
 		function sendLocalStorage(input) {
-			if (localStorage.hskFlipCard == undefined) {
-				localStorage.hskFlipCard = [];
+			if (localStorage.hskFlipCard == "undefined" || localStorage.hskFlipCard == undefined) {
+				localStorage.hskFlipCard = [0];
 				sendLocalStorage(input);
 			} else {
+				console.log(2)
 				wordsLearned = JSON.parse(localStorage.hskFlipCard);
 				localStorage.hskFlipCard = JSON.stringify([...new Set(input)]);
 			}
@@ -150,10 +151,13 @@
 			document.getElementById(`page${meny.name}`).style.display = 'block';
 			console.log(meny.name);
 			if (meny.name == 3) {
-				wordsLearned = JSON.parse(localStorage.hskFlipCard);
-				document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "";
-				for (let i = 0; i < wordsLearned.length; i++) {
-					document.getElementById(`page${meny.name}`).lastElementChild.innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+				if (localStorage.hskFlipCard !== "undefined") {
+					wordsLearned = JSON.parse(localStorage.hskFlipCard);
+					document.getElementById(`page${meny.name}`).firstElementChild.innerHTML = `Words Learned: ${wordsLearned.length}`
+					document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "";
+					for (let i = 0; i < wordsLearned.length; i++) {
+						document.getElementById(`page${meny.name}`).lastElementChild.innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+					}
 				}
 			}
 		}
@@ -184,10 +188,15 @@
 				<p>${dictCards[x].pinyin}</p>
 				<p>${dictCards[x].eng}</p>
 			`;
-			let rndThree = getCards(set,2);
-			rndThree.push(x);
+			// get 3 button cards
+			let rndThree = getCards(set,3);
+			// push correct card inn
+			if (!rndThree.includes(x)) {
+				rndThree.pop();
+				rndThree.push(x);
+			}
 			rndThree = shuffle(rndThree)
-			console.log(rndThree);
+			console.log(`%c ${rndThree}`,'color:red');
 			canFlip = false;
 			toggleAnimate(bigCard,'animate-2');
 			toggleAnimate(divAnswers,'animate-3');
@@ -257,7 +266,7 @@
 				dom.classList.toggle(animateName);
 			},time);
 		}
-		// Function to choose which HSK level, displat as text too.
+		// Function to choose which HSK level, display as text too.
 		function getCategory(arrDom,output) {
 			elvl.innerHTML = 'HSK';
 			dictCards = [];
@@ -358,7 +367,19 @@
 		</div>
 		<!-- PAGE 2 -->
 		<div id="page2">
-			<p>test</p>
+			<div class="review">
+				<br><br>
+				<div class="roundCircle" id="SRS">
+					<h2>SRS</h2>
+				</div>
+				<br><br><br><br>
+				<div class="settings">
+					<button class="btn">Settings</button>
+					<button class="btn">Settings</button>
+					<button class="btn">Settings</button>
+					<button class="btn">Settings</button>
+				</div>
+			</div>
 		</div>
 
 		<!-- PAGE 3 -->

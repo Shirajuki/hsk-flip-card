@@ -1,6 +1,6 @@
 :root {
   /* --theme-color1: #f7a7b9; */
-  --theme-color1: #b1596d;
+  --theme-color1: #aa5b78;
   --theme-color2: rgba(255,220,220,0.9);
   --text-color1: black;
   --text-color2: #888;
@@ -19,8 +19,8 @@
 @font-face {
   font-family: 'notoEmoji';
   src: url('../fonts/notoemoji.ttf') format('truetype'),
-   url('../fonts/notoemoji.woff') format('woff'),
-   url('../fonts/notoemoji.woff2') format('woff2');
+  url('../fonts/notoemoji.woff') format('woff'),
+  url('../fonts/notoemoji.woff2') format('woff2');
 }
 html {
   font-family: Arial,'Hiragino Sans GB',STXihei,'Microsoft YaHei',sans-serif;
@@ -63,6 +63,27 @@ body {
 }
 #page2, #page3 {
   display: none;
+}
+.review {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+#SRS {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-color: white;
+  align-self: center;
+  color: var(--text-color1);
+}
+.settings {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.settings .btn {
+  margin-bottom: 18px;
 }
 .divButtons {
   display: flex;
@@ -118,7 +139,6 @@ footer .active:after {
   height: 100%;
   color: black;
   font-size: 1.2rem;
-
 }
 .cards {
   width: 100%;
