@@ -24,6 +24,7 @@
 		let dictCards = [];
 		let cardDiv, allCards, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
 		let divAnswers, frontCard, backCard, progress, pinyinToggle, gameover;
+		let ebackSrs, eSrs;
 		let home, test, list;
 		let studyCardN = 0, correctStudy = 0;
 		let canFlip = false;
@@ -71,6 +72,7 @@
 			bigCard = document.getElementById('bigCard');
 			eflip = document.getElementById('eflip');
 			eback = document.getElementById('eback');
+
 			pinyinToggle.onchange = function() {
 				pinyin(this.checked);
 			}
@@ -86,6 +88,19 @@
 				correctStudy = 0;
 				progress.value = 0;
 			}
+		// DOM - SRS study section
+			ebackSrs = document.getElementById('ebackSrs');
+			eSrs = document.getElementById('eSrs')
+			ebackSrs.onclick = () => {
+				openClose(false,srs);
+				progressSrs.value = 0;
+			}
+			eSrs.children[0].children[0].lastElementChild.onclick = function() {
+				this.classList.toggle('active');
+				setTimeout(_=>this.classList.toggle('active'),1000);
+				let word = eSrs.children[0].children[0].children[1].innerText;
+				playTTS(word);
+			};
 		// DOM - hsk level chooser
 			elvl = document.getElementById('elvl');
 			elvl.onclick = () => openClose(true,choose);
@@ -107,7 +122,8 @@
 			cardSets = getCards(dictCards,9);
 			addCards(cardSets,cardDiv);
 			getMainCardData();
-			// menyChange(list);
+			menyChange(list);
+			menyChange(home);
 		}
 		function sendLocalStorage(input) {
 			if (localStorage.hskFlipCard == "undefined" || localStorage.hskFlipCard == undefined) {
@@ -148,15 +164,27 @@
 				document.getElementById(`page${i}`).style.display = 'none';
 			}
 			meny.classList.add('active');
+			if (meny.name == 1) document.getElementById(`page${meny.name}`).style.display = 'flex';
 			document.getElementById(`page${meny.name}`).style.display = 'block';
 			console.log(meny.name);
-			if (meny.name == 3) {
+
+			if (meny.name == 2 || meny.name == 3) {
 				if (localStorage.hskFlipCard !== "undefined") {
-					wordsLearned = JSON.parse(localStorage.hskFlipCard);
-					document.getElementById(`page${meny.name}`).firstElementChild.innerHTML = `Words Learned: ${wordsLearned.length}`
-					document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "";
-					for (let i = 0; i < wordsLearned.length; i++) {
-						document.getElementById(`page${meny.name}`).lastElementChild.innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+					if (meny.name == 3) {
+						wordsLearned = JSON.parse(localStorage.hskFlipCard);
+						document.getElementById(`page${meny.name}`).firstElementChild.innerHTML = `Words Learned: ${wordsLearned.length}`
+						document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "";
+						for (let i = 0; i < wordsLearned.length; i++) {
+							document.getElementById(`page${meny.name}`).lastElementChild.innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+						}
+					} else {
+						wordsLearned = JSON.parse(localStorage.hskFlipCard);
+						document.getElementById(`page${meny.name}`).firstElementChild.children[3].innerHTML = `Words Learned: ${wordsLearned.length}`
+						document.getElementById('page2').firstElementChild.children[2].onclick = function() {
+							this.classList.toggle('active');
+							setTimeout(_=>this.classList.toggle('active'),1000)
+							console.log("open sr study")
+						}
 					}
 				}
 			}
@@ -213,6 +241,7 @@
 				setTimeout(() => answerBtn.value = 'canClick',900);
 				answerBtn.onclick = function() {
 					if (this.value != 'undefined') {
+						answerBtn.classList.toggle('active');
 						if (studyCardN < 9) {
 							this.disabled = true;
 							if (this.innerHTML == backCard.children[1].innerHTML) {
@@ -246,12 +275,20 @@
 								}
 								wordsLearned.push(cardSets.map(x => dictCards[x]));
 								wordsLearned = [...new Set(wordsLearned)].flat();
+								wordsLearned.reduce((acc, current) => {
+								  const x = acc.find(item => item.pinyin === current.pinyin);
+								  if (!x) {
+								    return acc.concat([current]);
+								  } else {
+								    return acc;
+								  }
+								}, []);
 								sendLocalStorage(wordsLearned);
 								correctStudy = 0;
 							},2000)
 						}
 					}
-					}
+				}
 				divAnswers.appendChild(answerBtn);
 			}
 		}
@@ -372,10 +409,9 @@
 				<div class="roundCircle" id="SRS">
 					<h2>SRS</h2>
 				</div>
+				<h3>Words Learned:</h3>
 				<br><br><br><br>
 				<div class="settings">
-					<button class="btn">Settings</button>
-					<button class="btn">Settings</button>
 					<button class="btn">Settings</button>
 					<button class="btn">Settings</button>
 				</div>
@@ -429,11 +465,11 @@
 		</header>
 		<div id="eflip">
 			<div id="bigCard">
-				<div id="front">
+				<div id="front" class="front">
 					<p>gǒu</p>
 					<p>狗</p>
 				</div>
-				<div id="back">
+				<div id="back" class="back">
 					<p>gǒu</p>
 					<p>dog</p>
 				</div>
@@ -442,13 +478,42 @@
 		<span style='margin-top: 20px;'>click to flip</span>
 		<br><br>
 		<div style='justify-content: center; display: flex; width: 93%;'>
-			<div id="divAnswers">
+			<div id="divAnswers" class="studyBtn">
 				<button>A1</button>
 				<button>A2</button>
 				<button>A3</button>
 			</div>
 		</div>
 		<progress id='progress' value="0" max="9"></progress>
+	</div>
+	<!-- Spaced Repetitive Study flipcards -->
+	<div class="popup" id='srs'>
+		<header>
+			<div>
+				<p><a id='ebackSrs'><i>⬅</i> RETURN</a></p>
+				<p class="typeSrs">
+					<button>1</button><button>2</button><button>3</button>
+				</p>
+			</div>
+		</header>
+		<div id="eSrs">
+			<div id="bigCard">
+				<div class="front">
+					<p>gǒu</p>
+					<p>狗</p>
+					<p>Sound</p>
+				</div>
+			</div>
+		</div>
+		<br><br><br><br>
+		<div style='justify-content: center; display: flex; width: 93%;'>
+			<div id="divAnswersSrs" class="studyBtn">
+				<button>Easy</button>
+				<button>Good</button>
+				<button>Bad</button>
+			</div>
+		</div>
+		<progress id='progressSrs' value="0" max="9"></progress>
 	</div>
 </body>
 </html>

@@ -42,7 +42,7 @@ body {
 }
 #page3 #listWords {
   overflow: scroll;
-  height: 85vh
+  height: 90vh
 }
 #page3 #listWords div {
   font-size: 1.6rem;
@@ -61,6 +61,9 @@ body {
   /* flex-direction: column; */
   padding: 5px;
 }
+#page1, #page2, #page3 {
+  animation: fadein .5s linear;
+}
 #page2, #page3 {
   display: none;
 }
@@ -76,6 +79,10 @@ body {
   background-color: white;
   align-self: center;
   color: var(--text-color1);
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 .settings {
   width: 100%;
@@ -118,16 +125,13 @@ footer button {
   border-radius: 0;
   padding: 6px 0;
   width: 100%;
+  border-bottom: 5px solid var(--theme-color1);
 }
 footer .active {
   transform: translate(0,-5px);
 }
-footer .active:after {
-  content: '__';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%,0);
+footer .active > i {
+  border-bottom: 3px solid white;
 }
 #cardDiv {
   position: relative;
@@ -167,8 +171,8 @@ footer .active:after {
   /* white-space: nowrap; */
 }
 .cards p:last-child {
-  line-height: 0.85rem;
-  height: 1.65rem;
+  line-height: 1rem;
+  height: 1.8rem;
 }
 button {
   position: relative;
@@ -186,6 +190,22 @@ button.btn {
 button.btn:active {
   box-shadow: 0 5px rgba(255,220,220,0.9);
   transform: translateY(3px);
+}
+/* Effect Boris */
+.active {
+	animation: anim-effect-boris 0.3s forwards;
+}
+@keyframes anim-effect-boris {
+	0% {
+		transform: scale3d(0.3, 0.3, 1);
+	}
+	25%, 50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+		transform: scale3d(1, 1, 1);
+	}
 }
 .popup {
   visibility: hidden;
@@ -221,23 +241,31 @@ button.btn:active {
 #choose div p {
   width: 33%;
 }
-#study {
+/* #srs {
+  opacity: 1;
+  visibility: visible;
+} */
+#study, #srs {
   /* opacity: 1;
   visibility: visible; */
   justify-content: flex-start;
   background-color: var(--theme-color1);
 }
-#study header {
+#study header, #srs header {
   display: flex;
   justify-content: center;
   margin: 10px
    0 30px 0;
   width: 100%;
 }
-#study header div {
+#study header div, #srs header div {
   display: flex;
   justify-content: space-between;
   width: 85%;
+}
+.typeSrs button {
+  padding: 5px 10px;
+  margin: 0 5px;
 }
 progress[value] {
   -webkit-appearance: none;
@@ -259,13 +287,13 @@ progress[value]::-webkit-progress-value {
   background-size: 35px 20px, 100% 100%, 100% 100%;
   transition: width 1.5s ease;
 }
-#divAnswers {
+.studyBtn {
   display: grid;
   grid-gap: 7px;
   grid-template-columns: minmax(0, 33%) minmax(0, 33%) minmax(0, 33%);
   width: 93%;
 }
-#divAnswers button {
+.studyBtn button {
   position: relative;
   padding: 0;
   width: 100%;
@@ -277,11 +305,14 @@ progress[value]::-webkit-progress-value {
   /* box-shadow: inset 0 0 2rem rgba(100,0,0,0.5); */
   transition: box-shadow .3s, border .3s;
 }
-#divAnswers button:disabled {
+.studyBtn button:disabled {
   /* background-color: rgba(0,0,0,0.7); */
   cursor: auto;
 }
-#divAnswers button::after {
+.studyBtn button .active {
+	animation: anim-effect-boris 0.3s forwards;
+}
+.studyBtn button::after {
   content: '';
   position: absolute;
   width: 5px;
@@ -301,7 +332,7 @@ progress[value]::-webkit-progress-value {
 /* #divAnswers button:active::after, #divAnswers button:focus::after {
   animation: ripple .6s ease-out;
 } */
-#eflip {
+#eflip, #eSrs {
   background-color: transparent;
   width: 80%;
   height: 50%;
@@ -320,7 +351,7 @@ progress[value]::-webkit-progress-value {
 #bigCard.flipped {
   transform: rotateY(-180deg);
 }
-#front, #back {
+.front, .back {
   background-color: white;
   border-radius: 10px;
   line-height: 15pt;
@@ -336,20 +367,20 @@ progress[value]::-webkit-progress-value {
   overflow: hidden;
   backface-visibility: hidden;
 }
-#front {
+.front {
   font-size: 4rem;
 }
-#front p, #back p {
+.front p, .back p {
   height: 40px;
   margin: 20px;
   transition: opacity 1s;
 
 }
-#front p:first-child, #back p:first-child {
+.front p:first-child, .back p:first-child {
   color: var(--text-color2);
   font-size: 2rem;
 }
-#back {
+.back {
   transform: rotateY(-180deg);
 }
 /* Styling Checkbox */
