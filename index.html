@@ -95,6 +95,14 @@
 				openClose(false,srs);
 				progressSrs.value = 0;
 			}
+			document.getElementById('page2').firstElementChild.children[2].onclick = function() {
+				this.classList.toggle('active');
+				setTimeout(_=> {
+					this.classList.toggle('active');
+					openClose(true,srs);
+				},150);
+				console.log("open sr study");
+			}
 			eSrs.children[0].children[0].lastElementChild.onclick = function() {
 				this.classList.toggle('active');
 				setTimeout(_=>this.classList.toggle('active'),1000);
@@ -130,7 +138,7 @@
 				localStorage.hskFlipCard = [0];
 				sendLocalStorage(input);
 			} else {
-				console.log(2)
+				console.log("Sending to localStorage at 141")
 				wordsLearned = JSON.parse(localStorage.hskFlipCard);
 				localStorage.hskFlipCard = JSON.stringify([...new Set(input)]);
 			}
@@ -166,7 +174,6 @@
 			meny.classList.add('active');
 			if (meny.name == 1) document.getElementById(`page${meny.name}`).style.display = 'flex';
 			document.getElementById(`page${meny.name}`).style.display = 'block';
-			console.log(meny.name);
 
 			if (meny.name == 2 || meny.name == 3) {
 				if (localStorage.hskFlipCard !== "undefined") {
@@ -180,11 +187,6 @@
 					} else {
 						wordsLearned = JSON.parse(localStorage.hskFlipCard);
 						document.getElementById(`page${meny.name}`).firstElementChild.children[3].innerHTML = `Words Learned: ${wordsLearned.length}`
-						document.getElementById('page2').firstElementChild.children[2].onclick = function() {
-							this.classList.toggle('active');
-							setTimeout(_=>this.classList.toggle('active'),1000)
-							console.log("open sr study")
-						}
 					}
 				}
 			}
@@ -276,7 +278,7 @@
 								wordsLearned.push(cardSets.map(x => dictCards[x]));
 								wordsLearned = [...new Set(wordsLearned)].flat();
 								wordsLearned.reduce((acc, current) => {
-								  const x = acc.find(item => item.pinyin === current.pinyin);
+								  const x = acc.find(card => card.pinyin == current.pinyin);
 								  if (!x) {
 								    return acc.concat([current]);
 								  } else {
