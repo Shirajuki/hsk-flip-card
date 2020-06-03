@@ -1,0 +1,605 @@
+<!doctype html>
+<html>
+<head>
+	<title>Jonny</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<link href="css/index.css" rel="stylesheet" type="text/css">
+	<link href="css/preloader.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	<script type="text/javascript" src='hsk/hsk1.js'></script>
+	<script type="text/javascript" src='hsk/hsk2.js'></script>
+	<script type="text/javascript" src='hsk/hsk3.js'></script>
+	<link rel="manifest" href="manifest.json">
+	<script src='https://code.responsivevoice.org/responsivevoice.js'></script>
+	<script type="text/javascript">
+	// https://emojipedia.org/symbols/
+	// TODO list
+	// ### - ADD/Seperate by HSK levels on listed wordsLearned
+	// - Finish SRS
+	// - Add choice of traditional/simplified
+	// - Add more dataset, hsk4 - 6
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('service-worker.js');
+	}
+		setTimeout(showPage, 1400);
+	  function showPage() {
+			document.getElementById("loader").style.visibility = "hidden";
+			document.getElementById("loader").style.opacity = 0;
+	    setTimeout(() => {
+	      document.getElementById("loader").style.display = "none";
+	    },500)
+	  }
+		let dictCards = [];
+		let cardDiv, allCards, elvl, echange, estudy, choose, echoose, checkBox, study, eback, eflip, bigCard;
+		let divAnswers, frontCard, backCard, progress, pinyinToggle, gameover;
+		let ebackSrs, eSrs, divAnswersSrs;
+		let home, test, list;
+		let studyCardN = 0, correctStudy = 0;
+		let canFlip = false;
+		let cardSets = new Set();
+
+		let wordsLearned = [];
+		// Onload DOM and Event setups. Also calls some functions to initialize the app.
+		window.onload = () => {
+			// console.log = function() {};
+			// alert( 'Your screen resolution is ' + screen.width + 'x' + screen.height );
+		// DOM - footer
+			home = document.getElementById('home');
+			test = document.getElementById('test');
+			list = document.getElementById('list');
+			for (let v of [home,test,list]) {
+				v.onclick = function() {menyChange(this)};
+			}
+		// DOM - main menu
+			cardDiv = document.getElementById('cardDiv');
+			echange = document.getElementById('echange');
+			study = document.getElementById('study');
+			estudy = document.getElementById('estudy');
+			choose = document.getElementById('choose');
+
+			echange.onclick = () => {
+				cardSets = getCards(dictCards,9);
+				addCards(cardSets,cardDiv);
+				correctStudy = 0;
+				getMainCardData();
+			}
+			estudy.onclick = () => {
+				openClose(true,study);
+				studyCardN = 0;
+				cardSets = shuffle(cardSets);
+				studies();
+			};
+		// DOM - study section
+			divAnswers = document.getElementById('divAnswers');
+			frontCard = document.getElementById('front');
+			backCard = document.getElementById('back');
+			progress = document.getElementById('progress');
+			pinyinToggle = document.getElementById('pinyinToggle');
+			gameover = document.getElementById('gameover');
+
+			bigCard = document.getElementById('bigCard');
+			eflip = document.getElementById('eflip');
+			eback = document.getElementById('eback');
+
+			pinyinToggle.onchange = function() {
+				pinyin(this.checked);
+			}
+			eflip.onclick = () => {
+				if (canFlip) {
+					bigCard.classList.toggle('flipped');
+					let word = frontCard.children[1].innerText;
+					playTTS(word);
+				}
+			};
+			eback.onclick = () => {
+				openClose(false,study);
+				correctStudy = 0;
+				progress.value = 0;
+			}
+		// DOM - SRS study section
+			ebackSrs = document.getElementById('ebackSrs');
+			eSrs = document.getElementById('eSrs');
+			divAnswersSrs = document.getElementById('divAnswersSrs');
+			ebackSrs.onclick = () => {
+				openClose(false,srs);
+				progressSrs.value = 0;
+			}
+			document.getElementById('page2').firstElementChild.children[2].onclick = function() {
+				this.classList.toggle('active');
+				console.log("open sr study");
+				openSRS(wordsLearned,eSrs,divAnswersSrs);
+				setTimeout(_=> {
+					this.classList.toggle('active');
+					openClose(true,srs);
+				},150);
+			}
+		// DOM - hsk level chooser
+			elvl = document.getElementById('elvl');
+			elvl.onclick = () => openClose(true,choose);
+			echoose = document.getElementById('echoose');
+			echoose.onclick = () => {
+				openClose(false,choose);
+
+				cardSets = getCards(dictCards,9);
+				addCards(cardSets,cardDiv);
+				correctStudy = 0;
+				getMainCardData();
+			};
+			checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
+			for (let i = 0; i < checkBox.length; i++) {
+				checkBox[i].onchange = () => getCategory(checkBox,elvl);
+			}
+		// Initalize card functions, load the cards in for the first time.
+			getCategory(checkBox,elvl);
+			cardSets = getCards(dictCards,9);
+			addCards(cardSets,cardDiv);
+			getMainCardData();
+			menyChange(list);
+			menyChange(home);
+		}
+		function sendLocalStorage(input) {
+			if (localStorage.hskFlipCard == "undefined" || localStorage.hskFlipCard == undefined) {
+				localStorage.hskFlipCard = [0];
+				sendLocalStorage(input);
+			} else {
+				console.log("Sending to localStorage at 141")
+				wordsLearned = JSON.parse(localStorage.hskFlipCard);
+				localStorage.hskFlipCard = JSON.stringify([...new Set(input)]);
+			}
+		}
+		// Main menu function to give onclick event. CSS animation to flip card.
+		function getMainCardData() {
+			allCards = document.getElementsByClassName('cards');
+			for (let i = 0; i < allCards.length; i++) {
+				allCards[i].onclick = function() {mainFlip(this)};
+			}
+		}
+		function mainFlip(dom) {
+			toggleAnimate(dom,'cardsFlip',100);
+			dom.onclick = function() {};
+			setTimeout(function() {
+				dom.onclick = () => mainFlip(dom);
+			},1000);
+		}
+		// Custom logic functions for returning certain logical things.
+		function randint(min, max) {
+		  return Math.floor(Math.random() * (max - min + 1) ) + min;
+		}
+		function shuffle(array) {
+		  return array.sort(() => Math.random() - 0.5);
+		}
+		function menyChange(meny) {
+			for (let v of [home,test,list]) {
+				v.classList.remove('active');
+			}
+			for (let i = 1; i <= 3; i++) {
+				document.getElementById(`page${i}`).style.display = 'none';
+			}
+			meny.classList.add('active');
+			if (meny.name == 1) document.getElementById(`page${meny.name}`).style.display = 'flex';
+			document.getElementById(`page${meny.name}`).style.display = 'block';
+
+			if (meny.name == 2 || meny.name == 3) {
+				if (localStorage.hskFlipCard !== "undefined") {
+					if (meny.name == 3) {
+						wordsLearned = JSON.parse(localStorage.hskFlipCard);
+						document.getElementById(`page${meny.name}`).firstElementChild.innerHTML = `Words Learned: ${wordsLearned.length}`
+						document.getElementById(`page${meny.name}`).lastElementChild.innerHTML = "<span><p>HSK1</p></span><span><p>HSK2</p></span><span><p>HSK3</p></span>\
+						<span><p>HSK4</p></span><span><p>HSK5</p></span><span><p>HSK6</p></span>";
+						// wordsLearned = wordsLearned.map(function(e) {return  {...e, hsk: "1"}});
+						for (let i = 0; i < wordsLearned.length; i++) {
+							console.log(wordsLearned[i].hsk)
+							document.getElementById(`page${meny.name}`).lastElementChild.children[(wordsLearned[i].hsk)-1].innerHTML += `<div><span>${wordsLearned[i].simplified}</span><span>${wordsLearned[i].pinyin}</span><span>${wordsLearned[i].eng}</span></div>`;
+						}
+					} else {
+						wordsLearned = JSON.parse(localStorage.hskFlipCard);
+						document.getElementById(`page${meny.name}`).firstElementChild.children[3].innerHTML = `Words Learned: ${wordsLearned.length}`
+					}
+				}
+			}
+		}
+		// Function to play tts if there's wifi
+		function playTTS(word) {
+			if (navigator.onLine) {
+				responsiveVoice.speak(word,"Chinese Taiwan Female", "{pitch: 2, rate: 1, volume: 1}");
+			}
+		}
+		// Function to enable/disable pinyin from the flipcards
+		function pinyin(checked) {
+			if (!checked) {
+				front.children[0].style.opacity = 0;
+			} else {
+				front.children[0].style.opacity = 1;
+			}
+		}
+		// Function that operates the study section of the app,
+		// shows and setups other functions for the game to work.
+		function studyCard(set,front,back) {
+			let x = set[studyCardN];
+			front.innerHTML = `
+				<p>${dictCards[x].pinyin}</p>
+				<p>${dictCards[x].simplified}</p>
+			`;
+			pinyin(pinyinToggle.checked);
+			back.innerHTML = `
+				<p>${dictCards[x].pinyin}</p>
+				<p>${dictCards[x].eng}</p>
+			`;
+			// get 3 button cards
+			let rndThree = getCards(set,3);
+			// push correct card inn
+			if (!rndThree.includes(x)) {
+				rndThree.pop();
+				rndThree.push(x);
+			}
+			rndThree = shuffle(rndThree)
+			console.log(`%c ${rndThree}`,'color:red');
+			canFlip = false;
+			toggleAnimate(bigCard,'animate-2');
+			toggleAnimate(divAnswers,'animate-3');
+			setTimeout(() => {
+				let word = dictCards[x].simplified;
+				playTTS(word);
+			},250)
+			setTimeout(() => canFlip = true, 700);
+			divAnswers.innerHTML = '';
+			for (n of rndThree) {
+				let answerBtn = document.createElement('button');
+				answerBtn.innerHTML = dictCards[n].eng;
+				answerBtn.value = 'undefined';
+				setTimeout(() => answerBtn.value = 'canClick',900);
+				answerBtn.onclick = function() {
+					if (this.value != 'undefined') {
+						answerBtn.classList.toggle('active');
+						if (studyCardN < 9) {
+							this.disabled = true;
+							if (this.innerHTML == backCard.children[1].innerHTML) {
+								for (dom of divAnswers.children) {
+									dom.disabled = true;
+								}
+								correctStudy++;
+								this.style.boxShadow = '0 0 10px 10px rgb(255,230,230)';
+								this.style.backgroundColor = 'white';
+								setTimeout(() => {
+									studies();
+									if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
+									progress.value++;
+								},700);
+							} else {
+								this.style.backgroundColor = 'rgba(0,0,0,0.7)';
+								correctStudy--;
+							}
+						} else {
+							studyCardN = 0;
+							progress.value = 0;
+							openClose(true,gameover);
+							gameover.children[0].innerHTML = (correctStudy !== 8) ? ('FAIL') : ('PASS');
+							setTimeout(() => {
+								openClose(false,gameover);
+								openClose(false,study);
+								if (correctStudy !== 8) {
+									openClose(true,study);
+									studyCardN = 0;
+									studies();
+								}
+								wordsLearned.push(cardSets.map(x => dictCards[x]));
+								wordsLearned = [...new Set(wordsLearned)].flat();
+								wordsLearned.reduce((acc, current) => {
+								  const x = acc.find(card => card.pinyin == current.pinyin);
+								  if (!x) {
+								    return acc.concat([current]);
+								  } else {
+								    return acc;
+								  }
+								}, []);
+								sendLocalStorage(wordsLearned);
+								correctStudy = 0;
+							},2000)
+						}
+					}
+				}
+				divAnswers.appendChild(answerBtn);
+			}
+		}
+		function studies() {
+			studyCard(cardSets,frontCard,backCard);
+			studyCardN++;
+		}
+		// Custom function for toggling CSS animations after a given time.
+		function toggleAnimate(dom,animateName,time=1400) {
+			dom.classList.toggle(animateName);
+			setTimeout(() =>{
+				dom.classList.toggle(animateName);
+			},time);
+		}
+		// Function to choose which HSK level, display as text too.
+		function getCategory(arrDom,output) {
+			elvl.innerHTML = 'HSK';
+			dictCards = [];
+			for (let i = 0; i < arrDom.length; i++) {
+				if (arrDom[i].checked) {
+					let value = arrDom[i].value;
+					elvl.innerHTML += `-${value}`;
+					// Push all hsk to dict.
+					let dict = eval(`hsk${value}`);
+					for (let i = 0; i < dict.length; i++) {
+						let entry = dict[i].split(' ');
+						let eng = entry.splice(4,entry.length).join(' ')
+						dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, hsk: value});
+					}
+				}
+			}
+			if (dictCards.length == 0) {
+				arrDom[0].checked = true;
+				elvl.innerHTML += `-${arrDom[0].value}`;
+				for (let i = 0; i < hsk1.length; i++) {
+					let entry = hsk1[i].split(' ');
+					let eng = entry.splice(4,entry.length).join(' ')
+					dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, hsk: arrDom[0].value});
+				}
+			}
+		}
+		// Get unique cards from dictCards
+		function getCards(list,n,index=true) {
+			let set = new Set();
+			while (set.size < n) {
+				if (index) {
+					set.add(randint(0,list.length-1));
+				} else {
+					set.add(list[randint(0,list.length-1)])
+				}
+			}
+			set = Array.from(set);
+			console.log(set);
+			return set;
+		}
+		// Add the words from differenct HSK levels to the dictCards
+		function addCards(arr,output) {
+			output.innerHTML = '';
+			for (x of arr) {
+				let card = document.createElement('div');
+				card.className = 'cards';
+				card.innerHTML = `
+					<p>${dictCards[x].pinyin}</p>
+					<p>${dictCards[x].simplified}</p>
+					<p>${dictCards[x].eng}</p>
+				`;
+				output.appendChild(card);
+			}
+		}
+		// Weight card for SR
+		function weightCards(cardSet,w) {
+			let weightedCardSet = cardSet.map(function(e) {
+				if (e.weight == undefined || e.weight == "undefined") {
+					return  {...e, weight: "10"};
+				} else {
+					return  {...e, weight: w};
+				}
+			});
+			return weightedCardSet;
+		}
+		// SRS
+		function openSRS(learned,srs,divButtons,i = 0, set = []) {
+			wordsLearned = weightCards(learned);
+			sendLocalStorage(wordsLearned);
+			if (set.length < 1) set = getCards(wordsLearned,3)
+			let x = set[i];
+			srs.children[0].children[0].innerHTML = `
+				<p>${wordsLearned[x].pinyin}</p>
+				<p>${wordsLearned[x].simplified}</p>
+				<p>🔊</p>
+			`;
+			srs.children[0].children[0].lastElementChild.onclick = function() {
+				this.classList.toggle('active');
+				setTimeout(_=>this.classList.toggle('active'),1000);
+				let word = srs.children[0].children[0].children[1].innerText;
+				playTTS(word);
+			};
+			toggleAnimate(srs.children[0],'animate-2');
+			// toggleAnimate(divAnswers,'animate-3');
+			setTimeout(() => {
+				let word = wordsLearned[x].simplified;
+				playTTS(word);
+			},250)
+			divButtons.innerHTML = '';
+			const choice = ['Easy','Good','Bad'];
+			for (c of choice) {
+				let choiceBtn = document.createElement('button');
+				choiceBtn.innerHTML = c;
+				choiceBtn.value = 'undefined';
+				setTimeout(() => choiceBtn.value = 'canClick',900);
+				choiceBtn.onclick = function() {
+					this.classList.toggle('active');
+					for (dom of divButtons.children) {
+						dom.disabled = true;
+					}
+					this.style.boxShadow = '0 0 10px 10px rgb(255,230,230)';
+					this.style.backgroundColor = 'white';
+					if (this.innerText == 'Easy') {
+						console.log(1)
+					} else if (this.innerText == 'Good') {
+						console.log(2)
+					} else {
+						console.log(3)
+					}
+					setTimeout(_=> {
+						openSRS(wordsLearned,eSrs,divAnswersSrs,i+1,set)
+					},1000);
+				};
+				divButtons.appendChild(choiceBtn);
+			}
+		}
+		// Custom function to open/close popups.
+		function openClose(bool,dom,animateType=1) {
+		  if (bool) {
+		    dom.style.visibility = 'visible';
+		    dom.style.opacity = '1';
+
+				if (animateType !== 0) {
+					for (let i = 0; i < dom.childElementCount; i++) {
+						toggleAnimate(dom.children[i],`animate-${animateType}`);
+					}
+				}
+		  } else {
+		    dom.style.visibility = 'hidden';
+		    dom.style.opacity = '0';
+		  }
+		}
+	</script>
+</head>
+<body>
+	<div id="loader">
+		<div id="audio"></div>
+		<!-- <div id="preloader" preload></div> -->
+		<div class="spinner" preload></div>
+	</div>
+
+	<!-- Header -->
+	<header>
+		<button id="elvl">HSK</button>
+		<br><br>
+	</header>
+	<br>
+	<!-- Main -->
+	<main>
+		<!-- PAGE 1 -->
+		<div id="page1">
+			<div class="cardsMain">
+				<div id="cardDiv">
+				</div>
+			</div>
+			<br>
+			<div class='divButtons'>
+				<div>
+					<a><p id='echange'><i>◀</i> Change cards <i>▶</i></p></a>
+					<button id='estudy' class='btn'>Study</button>
+				</div>
+			</div>
+		</div>
+		<!-- PAGE 2 -->
+		<div id="page2">
+			<div class="review">
+				<br><br>
+				<div class="roundCircle" id="SRS">
+					<h2>SRS</h2>
+				</div>
+				<h3>Words Learned:</h3>
+				<br><br><br><br>
+				<div class="settings">
+					<button class="btn">TBA</button>
+					<button class="btn">TBA</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- PAGE 3 -->
+		<div id="page3">
+			<h3>Words Learned:</h3>
+			<div id="listWords">
+				<span class=""> HSK1
+					<div><span>A</span><span>B</span><span>C</span></div>
+				</span>
+				<span class=""> HSK2
+					<div><span>A</span><span>B</span><span>C</span></div>
+				</span>
+				<span class=""> HSK3
+					<div><span>A</span><span>B</span><span>C</span></div>
+				</span>
+				<span class=""> HSK4
+					<div><span>A</span><span>B</span><span>C</span></div>
+				</span>
+			</div>
+		</div>
+	</main>
+	<!-- Footer -->
+	<footer>
+		<button name="1" id='home' class='active'><i>🏠</i></button>
+		<button name="2" id='test'><i>📚</i></button>
+		<button name="3" id='list'><i>📜</i></button>
+	</footer>
+
+	<!-- HSK Level -->
+	<div class="popup" id='choose'>
+		<div>
+			<h4>Choose Flipcards from categories</h4>
+			<p><input type="checkbox" name="hsk-1" id="hsk1" value="1" checked><label for="hsk1">HSK1</label></p>
+			<p><input type="checkbox" name="hsk-2" id="hsk2" value="2"><label for="hsk2">HSK2</label></p>
+			<p><input type="checkbox" name="hsk-3" id="hsk3" value="3"><label for="hsk3">HSK3</label></p>
+			<p><input type="checkbox" name="hsk-4" id="hsk4" value="4"><label for="hsk4">HSK4</label></p>
+			<p><input type="checkbox" name="hsk-5" id="hsk5" value="5"><label for="hsk5">HSK5</label></p>
+			<p><input type="checkbox" name="hsk-6" id="hsk6" value="6"><label for="hsk6">HSK6</label></p>
+		</div>
+		<br>
+		<button id="echoose" class='btn'>Confirm</button>
+	</div>
+	<!-- Study Flipcards -->
+	<div class="popup" id='gameover'>
+		<h1>FAIL</h1>
+	</div>
+	<div class="popup" id='study'>
+		<header>
+			<div>
+				<p><a id='eback'><i>⬅</i> RETURN</a></p>
+				<p>
+					<label class="switch">
+					  <input type="checkbox" id='pinyinToggle'>
+					  <span class="slider round"></span>
+					</label>
+				</p>
+			</div>
+		</header>
+		<div id="eflip">
+			<div id="bigCard">
+				<div id="front" class="front">
+					<p>gǒu</p>
+					<p>狗</p>
+				</div>
+				<div id="back" class="back">
+					<p>gǒu</p>
+					<p>dog</p>
+				</div>
+			</div>
+		</div>
+		<span style='margin-top: 20px;'>click to flip</span>
+		<br><br>
+		<div style='justify-content: center; display: flex; width: 93%;'>
+			<div id="divAnswers" class="studyBtn">
+				<button>A1</button>
+				<button>A2</button>
+				<button>A3</button>
+			</div>
+		</div>
+		<progress id='progress' value="0" max="9"></progress>
+	</div>
+	<!-- Spaced Repetitive Study flipcards -->
+	<div class="popup" id='srs'>
+		<header>
+			<div>
+				<p><a id='ebackSrs'><i>⬅</i> RETURN</a></p>
+				<p class="typeSrs">
+					<button>1</button><button>2</button><button>3</button>
+				</p>
+			</div>
+		</header>
+		<div id="eSrs">
+			<div class="bigCard">
+				<div class="front">
+					<p>gǒu</p>
+					<p>狗</p>
+					<p>🔊</p>
+				</div>
+			</div>
+		</div>
+		<br><br><br><br>
+		<div style='justify-content: center; display: flex; width: 93%;'>
+			<div id="divAnswersSrs" class="studyBtn">
+				<button>Easy</button>
+				<button>Good</button>
+				<button>Bad</button>
+			</div>
+		</div>
+		<progress id='progressSrs' value="0" max="9"></progress>
+	</div>
+</body>
+</html>

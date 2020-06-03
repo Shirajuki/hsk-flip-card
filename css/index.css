@@ -28,7 +28,6 @@ html {
   background-color: var(--theme-color1);
   color: white;
   font-size: 12pt;
-  zoom: 1.1;
 }
 header {
   line-height: 13pt;
@@ -484,30 +483,6 @@ input:checked + .slider:before {
 }
 #gameover h1 {
   font-size: 7rem;
-}
-@media only screen and (max-height: 680px) {
-  html { zoom: 0.85 }
-}
-@media only screen and (max-height: 630px) {
-  html { zoom: 0.8 }
-}
-@media only screen and (max-height: 580px) {
-  html { zoom: 0.75 }
-}
-@media only screen and (max-height: 510px) {
-  html { zoom: 0.65 }
-}
-@media only screen and (max-height: 460px) {
-  html { zoom: 0.55 }
-}
-@media only screen and (max-height: 380px) {
-  html { zoom: 0.45 }
-}
-@media only screen and (max-height: 320px) {
-  html { zoom: 0.4 }
-}
-@media only screen and (max-height: 300px) {
-  html { zoom: 0.3 }
 }
 @keyframes rotate3D {
   from { transform: rotateY(-180deg); opacity: 0; }

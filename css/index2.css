@@ -1,0 +1,592 @@
+:root {
+  --theme-color1: #2A3040;
+  --theme-color2: #84ceeb;
+  --theme-color3: #3f6675;
+  --theme-color4: #c1c8e4;
+  --theme-color5: #8860d0;
+  --base-color1: rgba(57,65,86,0.73);
+  --base-color2: rgba(57,65,86,0.4);
+  --text-color1: black;
+  --text-color2: #888;
+  --footer-color: #2A3040;
+}
+/* 
+ * SCROLLBAR
+ * * * * * * * * * * * * * * * * * * * * * * */
+::-webkit-scrollbar {
+  width: 12px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #6b6de6;
+  border-radius: 10px;
+  box-shadow: inset 0 0 4px rgba(255,255,255,0.8);
+  -webkit-box-shadow: inset 0 0 4px rgba(255,255,255,0.8);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(150,150,150,0.4);
+}
+* {
+  /* disable text selection */
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+@font-face {
+  font-family: 'notoEmoji';
+  src: url('../fonts/notoemoji.ttf') format('truetype'),
+   url('../fonts/notoemoji.woff') format('woff'),
+   url('../fonts/notoemoji.woff2') format('woff2');
+}
+/* 
+ * HTML
+ * * * * * * * * * * * * * * * * * * * * * * */
+html {
+  font-family: Arial,'Hiragino Sans GB',STXihei,'Microsoft YaHei',sans-serif;
+  text-align: center;
+  background-color: var(--theme-color1);
+  color: white;
+  font-size: 12pt;
+  /* background-image: linear-gradient( 135deg, #43CBFF 10%, #9708CC 100%); */
+  height: 100%;
+}
+body {
+  overflow: hidden;
+  display: grid;
+  margin: 0;
+  font-size: 9pt; 
+}
+div#bodyWrapper {
+  display: grid;
+  grid-template-rows: 10% minmax(80%, 1fr) 10%;
+  grid-template-areas: "header"  "main"  "footer";
+  height: 100vh;
+}
+main {
+  height: 100%;
+  grid-area: main;
+  margin: 0 10px;
+}
+i {
+  font-family: 'notoEmoji', Fallback, sans-serif;
+  font-style: normal;
+}
+a, button {
+  cursor: pointer;
+}
+/* 
+ * HEADER
+ * * * * * * * * * * * * * * * * * * * * * * */
+div#bodyWrapper > header {
+  font-size: 1.3em;
+  font-weight: bold;
+  border-bottom: solid;
+  border-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 15%,
+  rgba(255,255,255,0.5) 50%, rgba(0,0,0,0) 85%, rgba(0,0,0,0) 100%);
+  border-image-slice: 1;
+  border-width: 5px;
+  margin: 0;
+  grid-area: header;
+}
+header button { border-radius: 5px; margin-top: 8px; }
+#page1, #page2, #page3 {
+  animation: fadein .5s linear;
+  height: 100%;
+}
+#page2, #page3 {
+  display: none;
+}
+/* 
+ * PAGE 1
+ * * * * * * * * * * * * * * * * * * * * * * */
+header.popupHeader {
+	display: flex;
+	justify-content: center;
+	margin: 10px 0 30px 0;
+	width: 100%;
+}
+header.popupHeader > div {
+	display: flex;
+	justify-content: space-between;
+	width: 80%;
+}
+#eflip, #eSrs {
+  background-color: transparent;
+  width: 80%;
+  height: 50%;
+  margin-top: -10px;
+  color: var(--text-color1);
+  perspective: 1000px;
+}
+/* Menu */
+#cardDiv {
+  position: relative;
+  display: grid;
+  grid-gap: 7px;
+  grid-template-columns: minmax(0, 33%) minmax(0, 33%) minmax(0, 33%);
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-size: 1.2rem;
+}
+.cards {
+  width: 100%;
+  position: relative;
+  background-color: white;
+  border-radius: 10px;
+  line-height: 8pt;
+  transform-style: preserve-3d;
+  animation: rotate3D 0.5s linear;
+  transition: transform .5s;
+}
+.cardsFlip {
+  animation: none;
+}
+.cards p:nth-child(even) {
+  /* font-weight: bold; */
+  line-height: 5pt;
+  font-size: 1.3rem;
+}
+.cards p:nth-child(odd) {
+  color: var(--text-color2);
+  font-size: 1rem;
+  line-height: 12pt;
+  overflow: hidden;
+  /* white-space: nowrap; */
+}
+.cards p:last-child {
+  line-height: 1rem;
+  height: 1.8rem;
+}
+div.cardsMain > div > a {
+	display: inline-block;
+	margin-top: 20px;
+}
+/* Study screen */
+.bigCard {
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+.bigCard.flipped {
+  transform: rotateY(-180deg);
+}
+p.hidePinyin {
+	opacity: 0;
+	pointer-events: none;
+}
+.front, .back {
+  background-color: white;
+  border-radius: 10px;
+  line-height: 15pt;
+  font-size: 1.1rem;
+  padding: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.front {
+  font-size: 4rem;
+}
+.front p, .back p {
+  height: 40px;
+  margin: 20px;
+  transition: opacity 1s;
+
+}
+.front p:first-child, .back p:first-child {
+  color: var(--text-color2);
+  font-size: 2rem;
+}
+.back {
+  transform: rotateY(-180deg);
+}
+progress[value] {
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 80%;
+  height: 5px;
+  position: absolute;
+  bottom: 25px;
+}
+progress[value]::-webkit-progress-bar {
+  background-color: var(--theme-color2);
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+progress[value]::-webkit-progress-value {
+  background-color: white;
+  border-radius: 2px;
+  background-size: 35px 20px, 100% 100%, 100% 100%;
+  transition: width 1.5s ease;
+}
+.studyBtn {
+  display: grid;
+  grid-gap: 7px;
+  grid-template-columns: minmax(0, 33%) minmax(0, 33%) minmax(0, 33%);
+  width: 93%;
+}
+.studyBtn button {
+  position: relative;
+  padding: 0;
+  width: 100%;
+  border-radius: 10px;
+  height: 6rem;
+  font-weight: normal;
+  font-size: 0.9rem;
+  overflow: hidden;
+  /* box-shadow: inset 0 0 2rem rgba(100,0,0,0.5); */
+  transition: box-shadow .3s, border .3s, background-color .3s;
+}
+.studyBtn button:disabled {
+  /* background-color: rgba(0,0,0,0.7); */
+  cursor: auto;
+}
+.active {
+	animation: plop 0.3s forwards;
+}
+.studyBtn button::after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  top: 50%;
+  left: 50%;
+  background: rgba(0, 0, 0, .5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  top: -7px;
+  width: 49px;
+  height: 29px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--theme-color2);
+  border: 2px solid white;
+  border-radius: 20px;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  top: 3.5px;
+  left: 5px;
+  border-radius: 50%;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+input:checked + .slider {
+  background-color: transparent;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px transparent;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(100%);
+  transform: translateX(100%);
+}
+/* Result */
+#studyResults ul:not(:last-child) {
+    margin: 0 0 15px 0;
+}
+#studyResults ul {
+    list-style: none;
+    padding: 10px 0;
+    width: 100%;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 4px;
+}
+#studyResults ul li:first-child {
+    margin: 10px;
+    padding: 10px;
+    background-color: rgba(0,0,0,0.5);
+    font-size: 1.2rem;
+}
+#studyResults > div {
+	width: 80%;
+	height: 70%;
+	overflow-y: auto;
+}
+button#resultButton { margin-top: 15px; }
+/* 
+ * PAGE 2
+ * * * * * * * * * * * * * * * * * * * * * * */
+.review {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+#SRS {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-color: white;
+  align-self: center;
+  color: var(--text-color1);
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.settings {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.settings .btn {
+  margin-bottom: 18px;
+}
+/* 
+ * PAGE 3
+ * * * * * * * * * * * * * * * * * * * * * * */
+#page3 #listWords {
+  overflow-y: scroll;
+  height: calc(100% - 60px);
+}
+#page3 #listWords>div>p {
+	position: relative;
+	font-size: 1.6rem;
+	color: black;
+	text-align: left;
+	background-color: white;
+	border-radius: 5px;
+	margin: 5px 0 3px 0;
+	padding: 10px 10%;
+}
+#page3 #listWords>div>p::after {
+	content: 'v';
+	position: absolute;
+	right: 20px;
+}
+#page3 #listWords>div>div {
+	display: none;
+	font-size: 1.6rem;
+	color: black;
+	background-color: #efeff0;
+	border-radius: 5px;
+}
+#page3 #listWords>div>div>div {
+	display: grid;
+	grid-template-columns: 30% 30% 40%;
+}
+#page3 #listWords>div>div.lwshow {
+	display: block;
+}
+/* 
+ * POPUPS
+ * * * * * * * * * * * * * * * * * * * * * * */
+div#study, div#srsPopup {
+	justify-content: flex-start;
+}
+.closePopup {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  font-size: 3em;
+  top: 0;
+  right: 0;
+  z-index: 99999;
+  cursor: pointer;
+}
+.closePopup:hover {
+  color: #5ab9ea;
+}
+/* Styling Checkbox */
+div.popup {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  z-index: 720;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  background: var(--theme-color1);
+  transition: .2s;
+}
+#hskPopup div {
+  color: black;
+  display: flex;
+  border-radius: 4px;
+  justify-content: space-around;
+  flex-flow: row wrap;
+  width: 80%;
+  padding: 10px;
+}
+#hskPopup div h4 {
+  width: 100%;
+}
+#hskPopup div, div.popup button {
+  color: black;
+  background-color: rgba(255,255,255,0.95)
+}
+#hskPopup div p {
+  width: 33%;
+}
+input[type=checkbox] + label {
+  display: block;
+  cursor: pointer;
+}
+input[type=checkbox] {
+  display: none;
+}
+input[type=checkbox] + label:before {
+  content: " ";
+  border: 0.1em solid #000;
+  border-radius: 0.4em;
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  padding: 0.1em 0.2em 0.2em 0.1em;
+  margin-right: 0.2em;
+  color: transparent;
+  transition: .2s;
+}
+input[type=checkbox] + label:active:before {
+  transform: scale(0);
+}
+input[type=checkbox]:checked + label:before {
+  background-color: rgba(0,0,0,0.7);
+  border-color: 0.1em solid var(--theme-color1);
+  color: #fff;
+}
+/* 
+ * FOOTER
+ * * * * * * * * * * * * * * * * * * * * * * */
+footer {
+  display: flex;
+  margin: 0;
+  bottom: 0;
+  left: 0;
+  justify-content: space-between;
+  background-color: var(--footer-color);
+  border-top: 10px solid var(--footer-color);
+  width: 100%;
+  grid-area: footer;
+  position: relative;
+  z-index: 520;
+}
+footer button {
+  text-align: center;
+  font-size: 1.5em;
+  color: white;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 6px 0;
+  width: 100%;
+}
+footer .active {
+  transform: translate(0,-5px);
+}
+footer .active:after {
+  content: '__';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%,0);
+}
+/* 
+ * BUTTON
+ * * * * * * * * * * * * * * * * * * * * * * */
+button {
+  position: relative;
+  background-color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--theme-color1);
+}
+button.btn {
+	box-shadow: 0 5px rgba(255,220,220,0.9);
+}
+button.btn:active {
+	box-shadow: 0 2px rgba(255,220,220,0.9);
+	transform: translateY(3px);
+}
+button#mainStudyBtn, button#hskButton {
+	display: block;
+	margin: 20px auto 0 auto;
+}
+.animate-1 {
+  animation: fadein 1s linear;
+}
+.animate-2 {
+  animation: fadeleft .7s linear;
+}
+.animate-3 {
+  animation: fade 1s linear;
+}
+@keyframes rotate3D {
+  from { transform: rotateY(-180deg); opacity: 0; }
+  to { transform: rotateY(0deg); opacity: 1; }
+}
+@keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes ripple {
+  0% { transform: scale(0, 0); opacity: 1; }
+  10% { transform: scale(10, 10); opacity: 1; }
+  100% { transform: scale(100, 100); opacity: 0; }
+}
+@keyframes plop {
+	0% { transform: scale3d(0.3, 0.3, 1); }
+	25%, 50% { opacity: 1; }
+	100% {
+		opacity: 1;
+		transform: scale3d(1, 1, 1);
+	}
+}
+@keyframes fadein {
+    from { transform: translate(0,20px); opacity: 0; }
+    to { transform: translate(0,0); opacity: 1; }
+}
+@keyframes fadeleft {
+    from { transform: translate(50px,0); opacity: 0; }
+    to { transform: translate(0,0); opacity: 1; }
+}
