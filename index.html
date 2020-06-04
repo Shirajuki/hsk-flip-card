@@ -15,6 +15,7 @@
 		<link rel="manifest" href="manifest.json">
 		<script type="text/javascript">
 			//https://github.com/ReubenBond/HanBaoBao/blob/master/DictionaryDbBuilder/Hsk/HskHskCom/2.txt
+			//http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2
 			setTimeout(showPage, 14);
 			function showPage() {
 				document.getElementById("loader").style.visibility = "hidden";
@@ -29,13 +30,15 @@
 			let correct = Array(9).fill(0);
 			let home, test, list;
 			let cardSets = new Set();
-
+			
+			let tts; // tts
 			let hskPopup, checkBox, elvl, hskButton; // page 1 header
 			let cardDiv, studyBtn, refreshCards, studyIndex = 0; // page 1 main
-			let lwp, lwhsk; // page 3 listWords
 			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true; //study screen
-			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0; // srs screen
-			let listWords; // save learned words
+			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = []; // srs screen
+			let infoPopup, infoCanShow = true; // page 2 srs
+			let settingsBtn, creditBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
+			let lwp, lwhsk, listWords; // page 3 list learned words
 			// Onload DOM and Event setups. Also calls some functions to initialize the app.
 			window.onload = () => {
 				home = document.getElementById('home');
@@ -44,10 +47,8 @@
 				for (let v of [home,test,list]) {
 					v.onclick = function() {menyChange(this);};
 				}
-				list.onclick = function() {
-					menyChange(this);
-					updateLearnedWords(learnedWords);
-				}
+				// tts
+				tts = document.getElementById("tts");
 				// header
 				checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
 				for (let i = 0; i < checkBox.length; i++) {
@@ -81,14 +82,23 @@
 				studyResults = document.getElementById("studyResults");
 				resultButton = document.getElementById("resultButton");
 				pinyinToggle = document.getElementById("pinyinToggle");
-				eflip.onclick = () => { if (canFlip) bigCard.classList.toggle('flipped'); }
+				eflip.onclick = () => { 
+					if (canFlip) {
+						bigCard.classList.toggle('flipped');
+						playTTS(bigCard.children[0].children[1].innerText);
+					}
+				}
 				eback.onclick = () => openClose(false,studyPopup);
 				resultButton.onclick = () => openClose(false,studyResults);
 				pinyinToggle.onchange = () => checkPinyin();
 				//SRS
 				srsBtn = document.getElementById("SRS");
 				srsPopup = document.getElementById("srsPopup");
-				srsBtn.onclick = () => runSRS();
+				srsBtn.onclick = function() {
+					this.classList.toggle("active");
+					runSRS();
+					setTimeout(() => this.classList.toggle("active"),1000);
+				}
 				ebackSrs = document.getElementById("ebackSrs");
 				srsBigCard = document.getElementById("srsBigCard");
 				srsFrontCard = document.getElementById("srsFront");
@@ -98,8 +108,36 @@
 				ebackSrs.onclick = () => {
 					openClose(false,srsPopup);
 					setLocalStorage(JSON.stringify(learnedWords));
+					checkSRS();
 				}
 				srsPinyinToggle.onchange = () => checkPinyin(1);
+				infoPopup = document.getElementById("infoPopup");
+				// page 2 settings
+				settingsPopup = document.getElementById("settingsPopup");
+				creditPopup = document.getElementById("creditPopup");
+				settingsBtn = document.getElementById("settingsBtn");
+				settingsCloseBtn = document.getElementById("settingsCloseBtn");
+				settingsLoadBtn = document.getElementById("settingsLoadBtn");
+				settingsResetBtn = document.getElementById("settingsResetBtn");
+				textarea = document.getElementById("textarea");
+				creditBtn = document.getElementById("creditBtn");
+				creditCloseBtn = document.getElementById("creditCloseBtn");
+				settingsBtn.onclick = () => {
+					openClose(true, settingsPopup);
+					textarea.value = utoa(localStorage.hskFlipCard);
+				}
+				settingsLoadBtn.onclick = () => loadProgress();
+				settingsCloseBtn.onclick = () => openClose(false, settingsPopup);
+				creditBtn.onclick = () => openClose(true, creditPopup);
+				creditCloseBtn.onclick = () => openClose(false, creditPopup);
+				chineseAlpha = document.getElementById("chineseAlpha");
+				chineseAlpha.onchange = () => init();
+				resetPopup = document.getElementById("resetPopup");
+				resetConfirmBtn = document.getElementById("resetConfirmBtn");
+				resetCloseBtn = document.getElementById("resetCloseBtn");
+				settingsResetBtn.onclick = () => openClose(true, resetPopup);
+				resetConfirmBtn.onclick = () => resetProgress();
+				resetCloseBtn.onclick = () => openClose(false, resetPopup);
 				// LocalStorage
 				listWords = document.getElementById("listWords");
 				// page 3 listWords
@@ -108,7 +146,7 @@
 				for (p of lwp) {
 					p.onclick = function() {
 						lwhsk[+this.innerText.substring(3)-1].classList.toggle("lwshow");
-						console.log(lwhsk[+this.innerText.substring(3)-1])
+						this.classList.toggle("lwshow");
 					}
 				}
 				checkLocalStorage();
@@ -123,19 +161,23 @@
 				//srsBtn.click();
 			}
 			function updateLearnedWords(wordList) {
-				document.getElementById('wordsLearned').innerHTML = "Words Learned: "+wordList.length;
+				document.getElementById('wordsLearned').innerHTML = "Words learned so far: "+wordList.length;
+				for (hsk of lwhsk) {
+					hsk.innerHTML = "";
+				}
 				for (const word of wordList) {
 					const card = document.createElement('div');
-					card.innerHTML = `<span>${word.simplified}</span> <span>${word.pinyin}</span> <span>${word.eng}</span>`;
+					card.innerHTML = `<span>${chineseAlpha.value=='simplified'?word.simplified:word.traditional}</span> <span>${word.pinyin}</span> <span>${word.eng}</span>`;
 					lwhsk[+word.hsk-1].appendChild(card);
 				}
 			}
-			function addToLearnedWords(set) {
+			function addToLearnedWords(set, correct) {
 				for (let i=0; i<set.length; i++) {
 					const cardNum = set[i];
 					const card = dictCards[cardNum];
 					if (!learnedWords.includes(card)) {
 						card.difficulty = card.hsk*0.1 + 0.3;
+						card.difficulty += correct[i] == 1 ? -0.1 : 0.1; // difficulty increase if not correct on study
 						// set time to yesterday so srs can run
 						// 1 day = 86399462
 						card.daysBetweenReview = 3;
@@ -159,18 +201,87 @@
 					learnedWords.push(card);
 				}
 			}
+			// TTS
+			function setTTS(word) {
+				const a = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(word)}&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female`;
+				if (tts.src != a) tts.src = a;
+			}
+			function playTTS(word) {
+				setTTS(word);
+				tts.play();
+			}
+			// Settings
+			function resetProgress() {
+				localStorage.removeItem("hskFlipCard");
+				location.reload();
+			}
+			function loadProgress() {
+				let error = false;
+				let progress = [];
+				try {
+					progress = JSON.parse(atou(textarea.value));
+					if (!checkValidProgress(progress)) throw "parse error";
+					learnedWords = progress;
+					setLocalStorage(JSON.stringify(learnedWords));
+					showInfoPopup("Successfully loaded the saved progress!");
+					checkSRS();
+					updateLearnedWords(learnedWords);
+				} catch(err) {
+					showInfoPopup("Error on loading saved progress!");
+				}
+			}
+			function checkValidProgress(progress) {
+				const keys = ["date", "daysBetweenReview", "difficulty", "eng", "hsk", "pinyin", "simplified", "traditional"];
+				for (let i=0; i<progress.length; i++) {
+					const word = progress[i];
+					const key = Object.keys(word).sort();
+					for (let j=0; j<keys.length; j++) {
+						if (key[j] != keys[j]) return false;
+					}
+					const val = Object.values(word);
+					if (val.length !== 8) return false;
+					if (val[0][0].charCodeAt() <= 122 && val[1][0].charCodeAt() <= 122) return false;
+					if (typeof val[2] != "string") return false;
+					if (typeof val[3] != "string") return false;
+					if (typeof val[4] != "string" && val[4].length != 1) return false;
+					if (typeof val[5] != "number") return false;
+					if (typeof val[6] != "number") return false;
+					if (typeof val[7] != "string") return false;
+					if (isNaN(new Date(val[7]).valueOf())) return false;
+				}
+				return true;
+			}
 			// SRS
 			function runSRS() {
-				const weightedCardSet = getWeightCards(learnedWords);
 				if (weightedCardSet.length > 0) {
 					srsIndex = 0;
 					srsProgress.value = 0;
 					srsProgress.max = weightedCardSet.length;
 					getSRSCard(weightedCardSet,srsFrontCard,srsBackCard);
-					console.log(weightedCardSet);
+					//console.log(weightedCardSet);
 					openClose(true,srsPopup);
 				} else {
-					console.log("no words to srs");
+					showInfoPopup("No words to study for today!");
+				}
+			}
+			function checkSRS() {
+				weightedCardSet = getWeightCards(learnedWords);
+				if (weightedCardSet.length > 0) {
+					const l = weightedCardSet.length;
+					document.getElementById('srsInfo').innerHTML = `There are ${l>1? l+" words" : l+" word"} to review! Do SRS!`
+				} else {
+					document.getElementById('srsInfo').innerHTML = "Nothing to review today!"
+				}
+			}
+			function showInfoPopup(msg) {
+				if (infoCanShow) {
+					infoCanShow = false;
+					infoPopup.children[0].children[0].innerHTML = msg;
+					openClose(true, infoPopup);
+					setTimeout(() => {
+						openClose(false, infoPopup)
+						infoCanShow = true;
+					},2400);
 				}
 			}
 			function getWeightCards(set) {
@@ -186,7 +297,7 @@
 			}
 			function getSRSCard(set,front,back) {
 				if (srsIndex == set.length) {
-					console.log("srs done");
+					showInfoPopup(`Finished reviewing ${set.length} words!<br/>Successfully updated weighting of learned words!`);
 					setTimeout(() => {
 						openClose(false,srsPopup);
 						setLocalStorage(JSON.stringify(learnedWords));
@@ -199,12 +310,13 @@
 				const card = learnedWords[cardNum];
 				front.innerHTML = `
 					<p>${card.pinyin}</p>
-					<p>${card.simplified}</p>
+					<p>${chineseAlpha.value=='simplified'?card.simplified:card.traditional}</p>
 				`;
 				back.innerHTML = `
 					<p>${card.pinyin}</p>
 					<p>${card.eng}</p>
 				`;
+				playTTS(card.simplified);
 				checkPinyin(1);
 				const chooseBtnWrapper = document.getElementById("srsDivAnswers");
 				toggleAnimate(bigCard,'animate-2');
@@ -268,7 +380,7 @@
 					const card = dictCards[set[i]];
 					studyResults.children[0].innerHTML += `
 						<ul>
-							<li style="color: ${correct[i] == 1 ? '#43ff43' : '#ff3b3b'};">[${card.simplified}] [${card.pinyin}]</li>
+							<li style="color: ${correct[i] == 1 ? '#43ff43' : '#ff3b3b'};">[${chineseAlpha.value=='simplified'?card.simplified:card.traditional}] [${card.pinyin}]</li>
 							<li>${card.eng}</li>
 						</ul>
 					`;
@@ -276,7 +388,7 @@
 				openClose(true,studyResults);
 				setTimeout(() => {
 					openClose(false,studyPopup);
-					addToLearnedWords(set);
+					addToLearnedWords(set,correct);
 				},600);
 			}
 			function checkPinyin(type=0) {
@@ -296,19 +408,19 @@
 			}
 			function getCard(set,front,back) {
 				if (studyIndex == set.length) {
-					console.log("done");
+					showInfoPopup("Finished studying! New words added!");
 					setTimeout(() => {
 						showResult(set,correct);
 					},500);
 					return;
 				}
-				console.log(set);
+				//console.log(set);
 				// get card, display card
 				const cardNum = set[studyIndex];
 				const card = dictCards[cardNum];
 				front.innerHTML = `
 					<p>${card.pinyin}</p>
-					<p>${card.simplified}</p>
+					<p>${chineseAlpha.value=='simplified'?card.simplified:card.traditional}</p>
 				`;
 				back.innerHTML = `
 					<p>${card.pinyin}</p>
@@ -322,6 +434,7 @@
 					options.pop();
 					options.push(cardNum);
 				}
+				playTTS(card.simplified);
 				options = shuffle(options);
 				const optionBtnWrapper = document.getElementById("divAnswers");
 				canFlip = false;
@@ -382,7 +495,7 @@
 					card.className = 'cards';
 					card.innerHTML = `
 						<p>${dictCards[x].pinyin}</p>
-						<p>${dictCards[x].simplified}</p>
+						<p>${chineseAlpha.value=='simplified'?dictCards[x].simplified:dictCards[x].traditional}</p>
 						<p>${dictCards[x].eng}</p>
 					`;
 					output.appendChild(card);
@@ -399,6 +512,14 @@
 			function clampNumber(num, a, b) {
 				return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 			}
+			// Encode base64
+			function utoa(str) {
+				return window.btoa(unescape(encodeURIComponent(str)));
+			}
+			// Decode base64
+			function atou(str) {
+				return decodeURIComponent(escape(window.atob(str)));
+			}
 			function menyChange(meny) {
 				for (let v of [home,test,list]) {
 					v.classList.remove('active');
@@ -411,6 +532,10 @@
 				if (meny.name == 1) {
 					document.getElementById(`page${meny.name}`).style.display = 'flex';
 					document.getElementById("bodyWrapper").children[0].style.display = 'block';
+				} else if (meny.name == 2) {
+					checkSRS();
+				} else if (meny.name == 3) {
+					updateLearnedWords(learnedWords);
 				}
 				document.getElementById(`page${meny.name}`).style.display = 'block';
 			}
@@ -510,9 +635,12 @@
 						<div class="roundCircle" id="SRS">
 							<h2>SRS</h2>
 						</div>
+						<div class="srsInfo">
+							<h4 id="srsInfo">Nothing for today!</h4>
+						</div>
 						<div class="settings">
-							<button class="btn">TBA</button>
-							<button class="btn">TBA</button>
+							<button class="btn" id="settingsBtn">Settings</button>
+							<button class="btn" id="creditBtn">Credit</button>
 						</div>
 					</div>
 				</div>
@@ -565,7 +693,7 @@
 						<p>
 						<span style="position: relative; top: -16px; right: 5px;">Show pinyin</span>
 						<label class="switch">
-							<input type="checkbox" id='pinyinToggle'>
+							<input type="checkbox" id='pinyinToggle' name="pinyinToggle">
 							<span class="slider round"></span>
 						</label>
 						</p>
@@ -603,7 +731,7 @@
 						<p>
 						<span style="position: relative; top: -16px; right: 5px;">Show pinyin</span>
 						<label class="switch">
-							<input type="checkbox" id='srsPinyinToggle'>
+							<input type="checkbox" id='srsPinyinToggle' name="srsPinyinToggle">
 							<span class="slider round"></span>
 						</label>
 						</p>
@@ -631,6 +759,51 @@
 					</div>
 				</div>
 				<progress id='srsProgress' value="0" max="9"></progress>
+			</div>
+
+			<!-- Settings -->
+			<div class="popup" id='settingsPopup'>
+				<div class="whitebox">
+					<h4>Chinese character writing:</h4>
+					<select id="chineseAlpha" name="chineseAlpha">
+						<option value="simplified" selected>Simplified</option>
+						<option value="traditional">Traditional</option>
+					</select>
+					<p>Progress code:</p>
+					<textarea id="textarea" name="" cols="30" rows="10"></textarea>
+					<button id="settingsLoadBtn" class='btn'>load saved progress</button>
+					<button id="settingsResetBtn" class='btn'>reset progress</button>
+					<button id="settingsCloseBtn" class='btn'>close settings</button>
+				</div>
+			</div>
+
+			<!-- Credits -->
+			<div class="popup" id='creditPopup'>
+				<div class="whitebox">
+					<h4>Code and app design by me</h4>
+					<p>HSK Dictionary data provided by <a href="https://github.com/ReubenBond/HanBaoBao" target="_blank">ReubenBond's app HanBaoBao</a></p>
+					<p>Spaced Repetition Learning algorithm (SM2+) provided by <a href="http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2" target="_blank">BlueRaja</a></p>
+					<p>Text-to-speech provided by <a href="https://texttospeech.io/" target="_blank">https://texttospeech.io/</a></p>
+					<p>The project and the datas provided are presented without licences<br/>
+					Feel free to build upon the project as you wish.</p>
+					<button id="creditCloseBtn" class='btn'>Close credits</button>
+				</div>
+			</div>
+
+			<!-- reset prompt popup -->
+			<div class="popup" id='resetPopup'>
+				<div class="whitebox">
+					<h4>Do you really want to reset your progress?</h4>
+					<button id="resetConfirmBtn" class='btn'>Confirm</button>
+					<button id="resetCloseBtn" class='btn'>Return</button>
+				</div>
+			</div>
+			<audio id="tts" src="https://texttospeech.responsivevoice.org/v1/text:synthesize?text=%E7%8B%97&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female"></audio>
+			<!-- info popup -->
+			<div class="popup" id='infoPopup'>
+				<div class="whitebox">
+					<h4>Successfully updated learned words!</h4>
+				</div>
 			</div>
 		</div>
 	</body>

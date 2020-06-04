@@ -353,7 +353,7 @@ button#resultButton { margin-top: 15px; }
   justify-content: center;
   flex-direction: column;
 }
-#SRS {
+div#SRS {
   width: 200px;
   height: 200px;
   border-radius: 50%;
@@ -364,8 +364,10 @@ button#resultButton { margin-top: 15px; }
   text-align: center;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
+div.srsInfo { margin-bottom: 20px; }
 .settings {
   width: 100%;
   display: flex;
@@ -374,11 +376,39 @@ button#resultButton { margin-top: 15px; }
 .settings .btn {
   margin-bottom: 18px;
 }
+#settingsPopup>div>button, #resetPopup>div>button {
+	margin-top: 10px;
+}
+#infoPopup {
+	z-index: 720;
+	background-color: rgba(0,0,0,0.8);
+}
+#infoPopup div, div.popup > div.whitebox {
+  color: black;
+  display: flex;
+  border-radius: 4px;
+  justify-content: space-around;
+  background-color: rgba(255,255,255,0.8);
+  flex-flow: column wrap;
+  width: 80%;
+  height: auto;
+  padding: 10px;
+}
+div.whitebox h4 {
+	font-size: 1.5em;
+	width: 100%;
+}
+textarea {
+	resize: none;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding: 3px;
+}
 /* 
  * PAGE 3
  * * * * * * * * * * * * * * * * * * * * * * */
 #page3 #listWords {
-  overflow-y: scroll;
+  overflow-y: auto;
   height: calc(100% - 60px);
 }
 #page3 #listWords>div>p {
@@ -388,8 +418,9 @@ button#resultButton { margin-top: 15px; }
 	text-align: left;
 	background-color: white;
 	border-radius: 5px;
-	margin: 5px 0 3px 0;
+	margin: 5px 0 1px 0;
 	padding: 10px 10%;
+	cursor: pointer;
 }
 #page3 #listWords>div>p::after {
 	content: 'v';
@@ -398,7 +429,7 @@ button#resultButton { margin-top: 15px; }
 }
 #page3 #listWords>div>div {
 	display: none;
-	font-size: 1.6rem;
+	font-size: 1rem;
 	color: black;
 	background-color: #efeff0;
 	border-radius: 5px;
@@ -406,9 +437,15 @@ button#resultButton { margin-top: 15px; }
 #page3 #listWords>div>div>div {
 	display: grid;
 	grid-template-columns: 30% 30% 40%;
+	background-color: rgb(255, 255, 255);
+	margin: 2px 0;
+	border-radius: 5px;
 }
 #page3 #listWords>div>div.lwshow {
 	display: block;
+}
+#page3 #listWords>div>p.lwshow {
+	background-color: lavender;
 }
 /* 
  * POPUPS
