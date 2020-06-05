@@ -23,7 +23,7 @@
 		<link rel="manifest" href="manifest.json">
 		<script type="text/javascript">
 			if ('serviceWorker' in navigator) {
-			  navigator.serviceWorker.register('service-worker.js');
+				navigator.serviceWorker.register('service-worker.js');
 			}
 		</script>
 		<script type="text/javascript">
@@ -53,10 +53,28 @@
 			let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
 			let lwp, lwhsk, listWords; // page 3 list learned words
 			// Onload DOM and Event setups. Also calls some functions to initialize the app.
-			window.onload = () => {
+			window.addEventListener('load', function() {
 				home = document.getElementById('home');
 				test = document.getElementById('test');
 				list = document.getElementById('list');
+				window.history.pushState({page:'home'}, 'home');
+				window.addEventListener('popstate', () => {
+					if (window.history.state == null) {
+						menyChange(home,true);
+						setTimeout(() => {
+							window.history.pushState({page:'home'},'home');
+						},2000);
+					} else {
+						switch (window.history.state.page) {
+							case 'home':
+								menyChange(home);
+								break;
+							case 'test':
+								menyChange(test);
+								break;
+						}
+					}
+				});
 				for (let v of [home,test,list]) {
 					v.onclick = function() {menyChange(this);};
 				}
@@ -69,21 +87,28 @@
 				}
 				hskPopup = document.getElementById("hskPopup");
 				elvl = document.getElementById('elvl');
-				elvl.onclick = () => openClose(true,hskPopup);
+				elvl.onclick = () => {
+					openClose(true,hskPopup);
+					window.history.pushState({page:'home',popup:1}, 'home');
+				}
 				hskButton = document.getElementById('hskButton');
 				hskButton.onclick = () => {
 					openClose(false,hskPopup);
 					init();
+					window.history.back();
 				};
 				// main
 				cardDiv = document.getElementById("cardDiv");
 				studyBtn = document.getElementById("mainStudyBtn");
 				refreshCards = document.getElementById("refreshCards");
-				studyBtn.onclick = () => study();
+				studyBtn.onclick = () => {
+					study();
+					window.history.pushState({page:'home',popup:2}, 'home');
+				};
 				refreshCards.onclick = () => {
 					cardSets = getCards(dictCards,9);
 					addCards(cardSets, cardDiv);
-				}
+				};
 				// study screen
 				studyPopup = document.getElementById("study");
 				eflip = document.getElementById("eflip");
@@ -101,7 +126,10 @@
 						playTTS(bigCard.children[0].children[1].innerText);
 					}
 				}
-				eback.onclick = () => openClose(false,studyPopup);
+				eback.onclick = () => {
+					openClose(false,studyPopup);
+					window.history.back();
+				}
 				resultButton.onclick = () => openClose(false,studyResults);
 				pinyinToggle.onchange = () => checkPinyin();
 				//SRS
@@ -111,6 +139,7 @@
 					this.classList.toggle("active");
 					runSRS();
 					setTimeout(() => this.classList.toggle("active"),1000);
+					window.history.pushState({page:'test',popup:1}, 'test');
 				}
 				ebackSrs = document.getElementById("ebackSrs");
 				srsBigCard = document.getElementById("srsBigCard");
@@ -122,6 +151,7 @@
 					openClose(false,srsPopup);
 					setLocalStorage(JSON.stringify(learnedWords));
 					checkSRS();
+					window.history.back();
 				}
 				srsPinyinToggle.onchange = () => checkPinyin(1);
 				infoPopup = document.getElementById("infoPopup");
@@ -138,11 +168,21 @@
 				settingsBtn.onclick = () => {
 					openClose(true, settingsPopup);
 					textarea.value = utoa(localStorage.hskFlipCard);
+					window.history.pushState({page:'test',popup:2}, 'test');
 				}
 				settingsLoadBtn.onclick = () => loadProgress();
-				settingsCloseBtn.onclick = () => openClose(false, settingsPopup);
-				creditBtn.onclick = () => openClose(true, creditPopup);
-				creditCloseBtn.onclick = () => openClose(false, creditPopup);
+				settingsCloseBtn.onclick = () => {
+					openClose(false, settingsPopup);
+					window.history.back();
+				}
+				creditBtn.onclick = () => {
+					openClose(true, creditPopup);
+					window.history.pushState({page:'test',popup:3}, 'test');
+				}
+				creditCloseBtn.onclick = () => {
+					openClose(false, creditPopup);
+					window.history.back();
+				}
 				chineseAlpha = document.getElementById("chineseAlpha");
 				chineseAlpha.onchange = () => init();
 				resetPopup = document.getElementById("resetPopup");
@@ -178,9 +218,7 @@
 								};
 							};
 							setTimeout(() => {
-								if (!foundUpdate) {
-									showInfoPopup("The app is already up to date!");
-								}
+								if (!foundUpdate) showInfoPopup("The app is already up to date!");
 								foundUpdate = false;
 							}, 1000);
 						}).catch(function(e) {
@@ -202,7 +240,7 @@
 				checkLocalStorage();
 				// initialization
 				init();
-			}
+			});
 			function init() {
 				getCategory(checkBox,elvl);
 				cardSets = getCards(dictCards,9);
@@ -323,7 +361,7 @@
 					document.getElementById('srsInfo').innerHTML = "Nothing to review today!"
 				}
 			}
-			function showInfoPopup(msg) {
+			function showInfoPopup(msg,timer=2400) {
 				if (infoCanShow) {
 					infoCanShow = false;
 					infoPopup.children[0].children[0].innerHTML = msg;
@@ -331,7 +369,7 @@
 					setTimeout(() => {
 						openClose(false, infoPopup)
 						infoCanShow = true;
-					},2400);
+					},timer);
 				}
 			}
 			function getWeightCards(set) {
@@ -570,7 +608,7 @@
 			function atou(str) {
 				return decodeURIComponent(escape(window.atob(str)));
 			}
-			function menyChange(meny) {
+			function menyChange(meny, force=false) {
 				for (let v of [home,test,list]) {
 					v.classList.remove('active');
 				}
@@ -580,11 +618,19 @@
 				}
 				meny.classList.add('active');
 				if (meny.name == 1) {
+					if (!force) window.history.replaceState({page:'home'},'home');
 					document.getElementById(`page${meny.name}`).style.display = 'flex';
 					document.getElementById("bodyWrapper").children[0].style.display = 'block';
+					openClose(false,hskPopup);
+					openClose(false,studyPopup);
 				} else if (meny.name == 2) {
+					if (!force) window.history.replaceState({page:'test'},'test');
 					checkSRS();
+					openClose(false,srsPopup);
+					openClose(false,settingsPopup);
+					openClose(false,creditPopup);
 				} else if (meny.name == 3) {
+					if (!force) window.history.replaceState({page:'list'},'list');
 					updateLearnedWords(learnedWords);
 				}
 				document.getElementById(`page${meny.name}`).style.display = 'block';
