@@ -155,6 +155,7 @@
 				checkUpdateBtn = document.getElementById("checkUpdateBtn");
 				checkUpdateBtn.addEventListener('click', function() {
 					if ('serviceWorker' in navigator) {
+						console.log("Checking for update...")
 						navigator.serviceWorker.register('service-worker.js').then(function(reg) {
 							//reg.update();
 							reg.onupdatefound = function() {
