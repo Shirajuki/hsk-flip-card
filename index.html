@@ -23,35 +23,7 @@
 		<link rel="manifest" href="manifest.json">
 		<script type="text/javascript">
 			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', function() {
-					navigator.serviceWorker.register('service-worker.js').then(function(reg) {
-						//reg.update();
-						reg.onupdatefound = function() {
-							var installingWorker = reg.installing;
-							installingWorker.onstatechange = function() {
-								switch (installingWorker.state) {
-									case 'installed':
-										if (navigator.serviceWorker.controller) {
-											// At this point, the old content will have been purged and the fresh content will
-											// have been added to the cache.
-											// It's the perfect time to display a "New content is available; please refresh."
-											// message in the page's interface.
-											reg.update();
-											console.log('New or updated content is available.');
-										} else {
-											console.log('Content is now available offline!');
-										}
-										break;
-									case 'redundant':
-										console.error('The installing service worker became redundant.');
-										break;
-								}
-							};
-						};
-					}).catch(function(e) {
-						console.error('Error during service worker registration:', e);
-					});
-				});
+			  navigator.serviceWorker.register('service-worker.js');
 			}
 		</script>
 		<script type="text/javascript">
@@ -182,31 +154,33 @@
 				// page 2 setting update btn
 				checkUpdateBtn = document.getElementById("checkUpdateBtn");
 				checkUpdateBtn.addEventListener('click', function() {
-					navigator.serviceWorker.register('service-worker.js').then(function(reg) {
-						reg.onupdatefound = function() {
-							var installingWorker = reg.installing;
-							installingWorker.onstatechange = function() {
-								switch (installingWorker.state) {
-									case 'installed':
-										if (navigator.serviceWorker.controller) {
-											// At this point, the old content will have been purged and the fresh content will
-											// have been added to the cache.
-											// It's the perfect time to display a "New content is available; please refresh."
-											// message in the page's interface.
-											reg.update();
-											console.log('New or updated content is available.');
-											showInfoPopup("Successfully updated the app!");
-										}
-										break;
-									case 'redundant':
-										showInfoPopup("The app is already up to date!");
-										break;
-								}
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.register('service-worker.js').then(function(reg) {
+							reg.onupdatefound = function() {
+								var installingWorker = reg.installing;
+								installingWorker.onstatechange = function() {
+									switch (installingWorker.state) {
+										case 'installed':
+											if (navigator.serviceWorker.controller) {
+												// At this point, the old content will have been purged and the fresh content will
+												// have been added to the cache.
+												// It's the perfect time to display a "New content is available; please refresh."
+												// message in the page's interface.
+												reg.update();
+												console.log('New or updated content is available.');
+												showInfoPopup("Successfully updated the app!");
+											}
+											break;
+										case 'redundant':
+											showInfoPopup("The app is already up to date!");
+											break;
+									}
+								};
 							};
-						};
-					}).catch(function(e) {
-						console.error('Error during service worker registration:', e);
-					});
+						}).catch(function(e) {
+							console.error('Error during service worker registration:', e);
+						});
+					}
 				});
 				// LocalStorage
 				listWords = document.getElementById("listWords");
