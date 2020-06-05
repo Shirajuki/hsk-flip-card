@@ -156,18 +156,14 @@
 				checkUpdateBtn.addEventListener('click', function() {
 					if ('serviceWorker' in navigator) {
 						navigator.serviceWorker.register('service-worker.js').then(function(reg) {
+							//reg.update();
 							reg.onupdatefound = function() {
 								var installingWorker = reg.installing;
 								installingWorker.onstatechange = function() {
 									switch (installingWorker.state) {
 										case 'installed':
 											if (navigator.serviceWorker.controller) {
-												// At this point, the old content will have been purged and the fresh content will
-												// have been added to the cache.
-												// It's the perfect time to display a "New content is available; please refresh."
-												// message in the page's interface.
 												reg.update();
-												console.log('New or updated content is available.');
 												showInfoPopup("Successfully updated the app!");
 											}
 											break;
