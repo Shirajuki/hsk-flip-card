@@ -155,27 +155,13 @@
 				checkUpdateBtn = document.getElementById("checkUpdateBtn");
 				checkUpdateBtn.addEventListener('click', function() {
 					if ('serviceWorker' in navigator) {
-						console.log("Checking for update...")
 						navigator.serviceWorker.register('service-worker.js').then(function(reg) {
-							//reg.update();
-							reg.onupdatefound = function() {
-								var installingWorker = reg.installing;
-								installingWorker.onstatechange = function() {
-									switch (installingWorker.state) {
-										case 'installed':
-											if (navigator.serviceWorker.controller) {
-												reg.update();
-												showInfoPopup("Successfully updated the app!");
-											}
-											break;
-										case 'redundant':
-											showInfoPopup("The app is already up to date!");
-											break;
-									}
-								};
-							};
-						}).catch(function(e) {
-							console.error('Error during service worker registration:', e);
+							reg.update();
+							if (navigator.serviceWorker.controller) {
+								showInfoPopup("Successfully updated the app!");
+							} else {
+								showInfoPopup("The app is already up to date!");
+							}
 						});
 					}
 				});
