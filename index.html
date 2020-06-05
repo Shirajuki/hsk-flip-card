@@ -50,7 +50,7 @@
 			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true; //study screen
 			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = []; // srs screen
 			let infoPopup, infoCanShow = true; // page 2 srs
-			let settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
+			let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
 			let lwp, lwhsk, listWords; // page 3 list learned words
 			// Onload DOM and Event setups. Also calls some functions to initialize the app.
 			window.onload = () => {
@@ -156,12 +156,35 @@
 				checkUpdateBtn.addEventListener('click', function() {
 					if ('serviceWorker' in navigator) {
 						navigator.serviceWorker.register('service-worker.js').then(function(reg) {
-							reg.update();
-							if (navigator.serviceWorker.controller) {
-								showInfoPopup("Successfully updated the app!");
-							} else {
-								showInfoPopup("The app is already up to date!");
-							}
+							reg.onupdatefound = function() {
+								foundUpdate = true;
+								var installingWorker = reg.installing;
+								installingWorker.onstatechange = function() {
+									switch (installingWorker.state) {
+										case 'installed':
+											if (navigator.serviceWorker.controller) {
+												reg.update();
+												console.log('New or updated content is available.');
+												showInfoPopup("Successfully updated the app!");
+											} else {
+												console.log('Content is now available offline!');
+												showInfoPopup("The app is already up to date!");
+											}
+											break;
+										case 'redundant':
+											console.error('The installing service worker became redundant.');
+											break;
+									}
+								};
+							};
+							setTimeout(() => {
+								if (!foundUpdate) {
+									showInfoPopup("The app is already up to date!");
+								}
+								foundUpdate = false;
+							}, 1000);
+						}).catch(function(e) {
+							console.error('Error during service worker registration:', e);
 						});
 					}
 				});
